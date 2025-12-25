@@ -55,8 +55,9 @@ async function createSubsets(sourceFontPath, outputDir) {
                     return;
                 }
 
-                // Tên file đích
-                const finalName = `MinecraftFont_${mode.toUpperCase()}.ttf`;
+                // Tên file đích: [OriginalName]_[Mode].ttf
+                const baseName = path.basename(sourceFontPath, '.ttf');
+                const finalName = `${baseName}_${mode.toUpperCase()}.ttf`;
                 const finalPath = path.join(outputDir, finalName);
 
                 try {
@@ -75,7 +76,7 @@ async function createSubsets(sourceFontPath, outputDir) {
     });
 
     await Promise.all(promises);
-    console.log(`--- HOÀN THÀNH TẠO SUBSET ---`);
+    console.log(`--- HOÀN THÀNH TẠO SUBSET CHO: ${path.basename(sourceFontPath)} ---`);
 }
 
 module.exports = { createSubsets };

@@ -7,100 +7,111 @@ const { createSubsets } = require('./subset');
 
 const CONFIG = {
     unitsPerEm: 1024,
-    pixelSize: 8, // Kích thước cơ sở (16px = 1 block Minecraft)
-    outputFile: path.join('dist', 'MinecraftFont.ttf'),
+    pixelSize: 8,
     fontFamily: 'Minecraft Custom',
-    limit: 53790 // Giới hạn số lượng ký tự (null = không giới hạn)
+    limit: 53790
 };
 
 // Ensure output directory exists
-fs.mkdirSync(path.dirname(CONFIG.outputFile), { recursive: true });
+const OUTPUT_DIR = path.join(__dirname, '../dist');
+if (!fs.existsSync(OUTPUT_DIR)) {
+    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+}
 
 const SCALE = CONFIG.unitsPerEm / CONFIG.pixelSize;
 
-/**
- * Hàm biến đổi đường dẫn SVG sang tọa độ Font
- * @param {string} d - SVG Path data
- * @param {number} scale - Tỉ lệ scale
- * @param {number} ascentPixel - Tọa độ đỉnh (để lật trục Y)
- * @param {number} xOffsetPixel - Khoảng cách lề trái (padding)
- */
 function transformPathToFontCoords(d, scale, ascentPixel, xOffsetPixel) {
     return d.replace(/([ML])\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)/g, (match, command, x, y) => {
         const pixelX = parseFloat(x);
         const pixelY = parseFloat(y);
-
-        // Cộng thêm xOffset để giữ đúng khoảng cách ký tự
         const fontX = (pixelX + xOffsetPixel) * scale;
-
-        // Lật trục Y: Font coords (Y tăng lên trên), Image coords (Y tăng xuống dưới)
         const fontY = (ascentPixel - pixelY) * scale;
-
         return `${command}${Math.round(fontX)} ${Math.round(fontY)}`;
     });
 }
 
-async function build() {
-    console.log("--- BẮT ĐẦU QUÁ TRÌNH BUILD FONT ---");
+/**
+ * Apply pseudo-bold effect: "Smear" pixels to the right.
+ * If pixel (x, y) is 1, then (x, y) and (x+1, y) become 1.
+ * This increases the width of the bitmap by 1 pixel.
+ */
+function transformBitmapBold(bitmap) {
+    if (!bitmap || bitmap.length === 0) return bitmap;
 
-    console.log("1. Đang đọc dữ liệu Texture...");
-    let charDataList = await fontProcess.main();
+    const rows = bitmap.length;
+    const cols = bitmap[0].length;
+    const newCols = cols + 1;
 
-    if (!charDataList || charDataList.length === 0) {
-        console.error("Lỗi: Không tìm thấy dữ liệu ký tự!");
-        return;
+    const newBitmap = [];
+
+    for (let r = 0; r < rows; r++) {
+        const row = bitmap[r];
+        const newRow = new Array(newCols).fill(0);
+        for (let c = 0; c < newCols; c++) {
+            // Current pixel OR Previous pixel
+            const curr = (c < cols) ? row[c] : 0;
+            const prev = (c > 0) ? row[c - 1] : 0;
+            newRow[c] = (curr === 1 || prev === 1) ? 1 : 0;
+        }
+        newBitmap.push(newRow);
     }
+    return newBitmap;
+}
 
-    // Giới hạn ký tự cho bản build chính thức (nếu có config)
-    if (CONFIG.limit && charDataList.length > CONFIG.limit) {
-        console.log(`⚠️  Giới hạn bản build: ${CONFIG.limit} ký tự đầu tiên (Tổng tìm thấy: ${charDataList.length})`);
-
-        // Sắp xếp theo Code Point để đảm bảo lấy đúng các ký tự cơ bản (ASCII/Latin-1)
-        charDataList.sort((a, b) => (a.unicode.codePointAt(0) || 0) - (b.unicode.codePointAt(0) || 0));
-
-        charDataList = charDataList.slice(0, CONFIG.limit);
-    }
-
-    console.log(`2. Đang xử lý ${charDataList.length} ký tự...`);
+/**
+ * Generate a font file based on options
+ * @param {Array} charDataList - List of character data
+ * @param {Object} options - { outputFile, isBold }
+ */
+async function generateFont(charDataList, options) {
+    const { outputFile, isBold } = options;
+    console.log(`\n=== Generating ${isBold ? 'BOLD' : 'REGULAR'} Font: ${outputFile} ===`);
 
     let glyphsXML = '';
     let count = 0;
     const usedCodePoints = new Set();
+    // Scale remains constant; we modify the geometry itself for bold
+    const currentScale = SCALE;
 
     for (const charData of charDataList) {
         const codePoint = charData.unicode.codePointAt(0);
-
         if (codePoint === undefined || isNaN(codePoint) || codePoint === 0) continue;
         if (usedCodePoints.has(codePoint)) continue;
         usedCodePoints.add(codePoint);
 
         let d = '';
-        // Tính độ rộng của ký tự trong font (Advance Width)
-        // Trong Minecraft, width bao gồm cả phần đã trim + 1px spacing mặc định (nếu muốn)
-        // Ở đây ta dùng width từ bitmap + xOffset (phần padding trái đã bị cắt)
-        // Nếu muốn chuẩn Minecraft, thường là width thực tế của ký tự + padding phải.
-        // Để đơn giản và an toàn, ta dùng: (width cắt + xOffset + 1px spacing nếu muốn thoáng) * Scale
-        // Nhưng logic chuẩn của Bitmap font thường là width = độ rộng ô chứa (nếu monospace) hoặc độ rộng ảnh.
-        // Ở đây charData.width là độ rộng ĐÃ CẮT.
-
         let visualWidth = charData.width || 0;
         let xOffset = charData.xOffset || 0;
+        let bitmapToUse = charData.bitmap;
 
-        // Advance Width = (Padding trái + Độ rộng chữ + 1px padding phải mặc định) * Scale
-        // Lưu ý: Minecraft thường tự động thêm 1px padding giữa các ký tự khi render. 
-        // Trong TTF, ta phải tính luôn vào Advance Width.
+        // Apply Bold Transformation
+        if (isBold && charData.type === 'bitmap') {
+            bitmapToUse = transformBitmapBold(charData.bitmap);
+            // Re-calculate width from the new bitmap
+            if (bitmapToUse.length > 0) {
+                visualWidth = bitmapToUse[0].length;
+            }
+            // xOffset does NOT scale, but the glyph visually gets wider by 1px
+            // which handles itself in the bitmap. 
+        } else if (isBold && charData.type === 'space') {
+            // For space, we probably just widen it by 1px or keep same?
+            // "Doubling pixels" for space (empty) -> 0 -> 0 0. 
+            // So width increases by 1px.
+            visualWidth += 1;
+        }
+
+        // Calculate Advance Width
+        // Default spacing logic: (xOffset + Width + 1px spacing)
         let horizAdvX = (xOffset + visualWidth + 1) * SCALE;
 
-        if (charData.type === 'bitmap' && charData.bitmap && charData.bitmap.length > 0) {
-            const rawPath = bitmapToSVGPath(charData.bitmap);
+        if (charData.type === 'bitmap' && bitmapToUse && bitmapToUse.length > 0) {
+            const rawPath = bitmapToSVGPath(bitmapToUse);
             if (rawPath) {
                 const ascent = charData.ascent !== undefined ? charData.ascent : (charData.height - 1);
-                // Truyền xOffset vào để dịch chuyển path sang phải
                 d = transformPathToFontCoords(rawPath, SCALE, ascent, xOffset);
             }
-        }
-        else if (charData.type === 'space') {
-            horizAdvX = charData.width * SCALE;
+        } else if (charData.type === 'space') {
+            horizAdvX = visualWidth * SCALE;
         }
 
         const unicodeHex = `&#x${codePoint.toString(16).toUpperCase()};`;
@@ -113,19 +124,19 @@ async function build() {
         }
 
         count++;
-        if (count % 1000 === 0) process.stdout.write(`.`);
+        if (count % 2000 === 0) process.stdout.write(`.`);
     }
 
-    console.log(`\nTổng số ký tự hợp lệ: ${count}`);
-    console.log("3. Đang đóng gói SVG và compile TTF...");
+    console.log(`\nProcessed ${count} glyphs.`);
 
     const svgContent = `<?xml version="1.0" standalone="no"?>
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
     <svg xmlns="http://www.w3.org/2000/svg">
         <defs>
-            <font id="MinecraftFont" horiz-adv-x="${Math.round(8 * SCALE)}">
+            <font id="MinecraftFont${isBold ? 'Bold' : ''}" horiz-adv-x="${Math.round(8 * SCALE)}">
                 <font-face 
                     font-family="${CONFIG.fontFamily}" 
+                    font-weight="${isBold ? 'bold' : 'normal'}"
                     units-per-em="${CONFIG.unitsPerEm}" 
                     ascent="${CONFIG.unitsPerEm}" 
                     descent="0" 
@@ -139,28 +150,60 @@ async function build() {
     try {
         const fontObj = Font.create(svgContent, {
             type: 'svg',
-            hinting: true // Bật hinting để hiển thị tốt hơn ở size nhỏ
+            hinting: true
         });
 
         const fontData = fontObj.get();
         fontData.name.fontFamily = CONFIG.fontFamily;
+        fontData.name.fontSubfamily = isBold ? 'Bold' : 'Regular';
+        fontData.name.fullName = `${CONFIG.fontFamily} ${isBold ? 'Bold' : ''}`;
         fontData.name.version = 'Version 1.0';
         fontObj.set(fontData);
 
         const ttfBuffer = fontObj.write({ type: 'ttf' });
-        fs.writeFileSync(CONFIG.outputFile, ttfBuffer);
+        fs.writeFileSync(outputFile, ttfBuffer);
 
-        console.log(`--- THÀNH CÔNG! ---`);
-        console.log(`Đã tạo file: ${CONFIG.outputFile}`);
+        console.log(`✅ Saved: ${outputFile}`);
 
-        // Tạo subset
-        await createSubsets(CONFIG.outputFile, path.dirname(CONFIG.outputFile));
+        // Generate Subsets
+        await createSubsets(outputFile, path.dirname(outputFile));
 
     } catch (e) {
-        console.error("Lỗi khi compile font:", e);
-        fs.writeFileSync('error_dump.svg', svgContent);
-        console.log("Đã ghi file 'error_dump.svg' để debug.");
+        console.error(`❌ Error building font ${outputFile}:`, e);
+        // fs.writeFileSync(`error_dump_${isBold ? 'bold' : 'reg'}.svg`, svgContent);
     }
 }
 
-build();
+async function main() {
+    console.log("--- STARTING BUILD PROCESS ---");
+
+    console.log("1. Reading Texture Data...");
+    let charDataList = await fontProcess.main();
+
+    if (!charDataList || charDataList.length === 0) {
+        console.error("Error: No character data found!");
+        return;
+    }
+
+    if (CONFIG.limit && charDataList.length > CONFIG.limit) {
+        console.log(`⚠️  Limit applied: ${CONFIG.limit} chars.`);
+        charDataList.sort((a, b) => (a.unicode.codePointAt(0) || 0) - (b.unicode.codePointAt(0) || 0));
+        charDataList = charDataList.slice(0, CONFIG.limit);
+    }
+
+    // Build Regular
+    await generateFont(charDataList, {
+        outputFile: path.join(OUTPUT_DIR, 'MinecraftFont.ttf'),
+        isBold: false
+    });
+
+    // Build Bold
+    await generateFont(charDataList, {
+        outputFile: path.join(OUTPUT_DIR, 'MinecraftFont-Bold.ttf'),
+        isBold: true
+    });
+
+    console.log("\n--- BUILD COMPLETE ---");
+}
+
+main();

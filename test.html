@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Font Tester</title>
+    <style>
+        @font-face {
+            font-family: 'Minecraft Custom';
+            src: url('dist/MinecraftFont.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Minecraft Custom';
+            src: url('dist/MinecraftFont-Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #4caf50;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: 1px;
+            color: var(--primary-color);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--primary-color);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .preview-area {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background-color: #000;
+            color: #fff;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Minecraft Custom', sans-serif;
+            font-size: 32px;
+            /* Large size to see pixels clearly */
+            resize: vertical;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+            image-rendering: pixelated;
+            /* Essential for pixel fonts */
+            line-height: 1.5;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Classes for toggling */
+        .is-bold {
+            font-weight: bold;
+        }
+
+        .is-italic {
+            font-style: italic;
+        }
+
+        .is-underline {
+            text-decoration: underline;
+        }
+
+        .is-strikethrough {
+            text-decoration: line-through;
+        }
+
+        .is-underline.is-strikethrough {
+            text-decoration: underline line-through;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Minecraft Font Tester</h1>
+
+        <div class="controls">
+            <label class="control-group">
+                <input type="checkbox" id="bold-check">
+                <span>Bold</span>
+            </label>
+            <label class="control-group">
+                <input type="checkbox" id="italic-check">
+                <span>Italic</span>
+            </label>
+            <label class="control-group">
+                <input type="checkbox" id="underline-check">
+                <span>Underline</span>
+            </label>
+            <label class="control-group">
+                <input type="checkbox" id="strikethrough-check">
+                <span>Strikethrough</span>
+            </label>
+        </div>
+
+        <div class="preview-area">
+            <textarea id="preview-text" placeholder="Type here to test the font...
+Try typing: Hello World!
+1234567890
+!@#$%^&*()"></textarea>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated font path: dist/MinecraftFont.ttf
+    </div>
+
+    <script>
+        const textarea = document.getElementById('preview-text');
+        const controls = {
+            bold: document.getElementById('bold-check'),
+            italic: document.getElementById('italic-check'),
+            underline: document.getElementById('underline-check'),
+            strikethrough: document.getElementById('strikethrough-check')
+        };
+
+        function updateStyles() {
+            if (controls.bold.checked) {
+                textarea.classList.add('is-bold');
+            } else {
+                textarea.classList.remove('is-bold');
+            }
+
+            if (controls.italic.checked) {
+                textarea.classList.add('is-italic');
+            } else {
+                textarea.classList.remove('is-italic');
+            }
+
+            // Handle decorations completely
+            textarea.classList.remove('is-underline', 'is-strikethrough');
+
+            if (controls.underline.checked) {
+                textarea.classList.add('is-underline');
+            }
+            if (controls.strikethrough.checked) {
+                textarea.classList.add('is-strikethrough');
+            }
+        }
+
+        // Add event listeners
+        Object.values(controls).forEach(input => {
+            input.addEventListener('change', updateStyles);
+        });
+    </script>
+</body>
+
+</html>
