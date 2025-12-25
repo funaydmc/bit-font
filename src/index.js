@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { Font } = require('fonteditor-core');
+const { Font, woff2 } = require('fonteditor-core');
 const fontProcess = require('./font');
 const { bitmapToSVGPath } = require('./convert');
 const { createSubsets } = require('./subset');
@@ -160,13 +160,26 @@ async function generateFont(charDataList, options) {
         fontData.name.version = 'Version 1.0';
         fontObj.set(fontData);
 
-        const ttfBuffer = fontObj.write({ type: 'ttf' });
-        fs.writeFileSync(outputFile, ttfBuffer);
-
+        // Write output WOFF2
+        const woff2Buffer = fontObj.write({ type: 'woff2' });
+        fs.writeFileSync(outputFile, woff2Buffer);
         console.log(`✅ Saved: ${outputFile}`);
 
-        // Generate Subsets
-        await createSubsets(outputFile, path.dirname(outputFile));
+        // Generate Subsets (requires TTF)
+        const tempTtfPath = outputFile.replace('.woff2', '.ttf');
+        const ttfBuffer = fontObj.write({ type: 'ttf' });
+        fs.writeFileSync(tempTtfPath, ttfBuffer);
+        console.log(`Examples temp TTF saved for subsetting: ${tempTtfPath}`);
+
+        try {
+            await createSubsets(tempTtfPath, path.dirname(outputFile));
+        } finally {
+            // Clean up temp TTF
+            if (fs.existsSync(tempTtfPath)) {
+                fs.unlinkSync(tempTtfPath);
+                console.log(`🧹 Deleted temp TTF: ${tempTtfPath}`);
+            }
+        }
 
     } catch (e) {
         console.error(`❌ Error building font ${outputFile}:`, e);
@@ -176,6 +189,7 @@ async function generateFont(charDataList, options) {
 
 async function main() {
     console.log("--- STARTING BUILD PROCESS ---");
+    await woff2.init();
 
     console.log("1. Reading Texture Data...");
     let charDataList = await fontProcess.main();
@@ -193,13 +207,13 @@ async function main() {
 
     // Build Regular
     await generateFont(charDataList, {
-        outputFile: path.join(OUTPUT_DIR, 'MinecraftFont.ttf'),
+        outputFile: path.join(OUTPUT_DIR, 'MinecraftFont.woff2'),
         isBold: false
     });
 
     // Build Bold
     await generateFont(charDataList, {
-        outputFile: path.join(OUTPUT_DIR, 'MinecraftFont-Bold.ttf'),
+        outputFile: path.join(OUTPUT_DIR, 'MinecraftFont-Bold.woff2'),
         isBold: true
     });
 

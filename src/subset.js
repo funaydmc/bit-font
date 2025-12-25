@@ -37,7 +37,8 @@ async function createSubsets(sourceFontPath, outputDir) {
                 .use(Fontmin.glyph({
                     text: CHARSETS[mode],
                     hinting: false
-                }));
+                }))
+                .use(Fontmin.ttf2woff2());
 
             // Không dùng .dest() nữa để tránh lỗi filesystem race condition
             // Ta sẽ ghi file thủ công từ buffer trả về
@@ -55,16 +56,22 @@ async function createSubsets(sourceFontPath, outputDir) {
                     return;
                 }
 
-                // Tên file đích: [OriginalName]_[Mode].ttf
+                // Find woff2 file in the output
+                const woff2File = files.find(f => path.extname(f.relative) === '.woff2');
+
+                if (!woff2File) {
+                    console.error(`❌ Không tìm thấy file woff2 cho subset ${mode}`);
+                    reject(new Error('No woff2 file generated'));
+                    return;
+                }
+
+                // Tên file đích: [OriginalName]_[Mode].woff2
                 const baseName = path.basename(sourceFontPath, '.ttf');
-                const finalName = `${baseName}_${mode.toUpperCase()}.ttf`;
+                const finalName = `${baseName}_${mode.toUpperCase()}.woff2`;
                 const finalPath = path.join(outputDir, finalName);
 
                 try {
-                    // Files[0] là file TTF đã subset (Vinyl object có thuộc tính contents là Buffer)
-                    const subsetBuffer = files[0].contents;
-
-                    fs.writeFileSync(finalPath, subsetBuffer);
+                    fs.writeFileSync(finalPath, woff2File.contents);
                     console.log(`✅ Đã tạo subset: ${finalName}`);
                     resolve(finalPath);
                 } catch (e) {
