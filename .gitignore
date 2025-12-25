@@ -32,4 +32,3 @@ coverage/
 # Package files
 *.tgz
 MinecraftFont.ttf
-package-lock.json

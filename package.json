@@ -6,9 +6,6 @@
     "scripts": {
         "start": "node src/index.js"
     },
-    "devDependencies": {
-        "esbuild": "^0.19.8"
-    },
     "keywords": [],
     "author": "",
     "license": "ISC",
