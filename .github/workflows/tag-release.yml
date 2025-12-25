@@ -17,6 +17,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build font
+        run: npm run build
+
       - name: Set up Git user
         run: |
           git config user.name "github-actions"
@@ -26,15 +38,16 @@ jobs:
         env:
           TAG_NAME: ${{ github.event.inputs.tag_name }}
         run: |
-          git tag "$TAG_NAME"
-          git push origin "$TAG_NAME"
+          git tag "$TAG_NAME" || true
+          git push origin "$TAG_NAME" || true
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.tag_name }}
-          release_name: ${{ github.event.inputs.tag_name }}
+          name: ${{ github.event.inputs.tag_name }}
           draft: false
           prerelease: false
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
