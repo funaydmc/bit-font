@@ -3,6 +3,7 @@ const path = require('path');
 const { Font } = require('fonteditor-core');
 const fontProcess = require('./font');
 const { bitmapToSVGPath } = require('./convert');
+const { createSubsets } = require('./subset');
 
 const CONFIG = {
     unitsPerEm: 1024,
@@ -151,6 +152,9 @@ async function build() {
 
         console.log(`--- THÀNH CÔNG! ---`);
         console.log(`Đã tạo file: ${CONFIG.outputFile}`);
+
+        // Tạo subset
+        await createSubsets(CONFIG.outputFile, path.dirname(CONFIG.outputFile));
 
     } catch (e) {
         console.error("Lỗi khi compile font:", e);

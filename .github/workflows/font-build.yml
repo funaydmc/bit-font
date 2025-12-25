@@ -23,7 +23,6 @@ jobs:
         run: npm ci
 
       - name: Build font
-        # Giả sử có script "build" trong package.json để tạo font
         run: npm run build
 
       - name: Upload artifact
