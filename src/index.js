@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const { Font } = require('fonteditor-core');
 const fontProcess = require('./font');
 const { bitmapToSVGPath } = require('./convert');
@@ -6,10 +7,13 @@ const { bitmapToSVGPath } = require('./convert');
 const CONFIG = {
     unitsPerEm: 1024,
     pixelSize: 8, // Kích thước cơ sở (16px = 1 block Minecraft)
-    outputFile: 'MinecraftFont.ttf',
+    outputFile: path.join('dist', 'MinecraftFont.ttf'),
     fontFamily: 'Minecraft Custom',
     limit: 53790 // Giới hạn số lượng ký tự (null = không giới hạn)
 };
+
+// Ensure output directory exists
+fs.mkdirSync(path.dirname(CONFIG.outputFile), { recursive: true });
 
 const SCALE = CONFIG.unitsPerEm / CONFIG.pixelSize;
 
