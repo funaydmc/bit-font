@@ -100,14 +100,13 @@ async function debugAndBuildOneChar(targetChar) {
 
     // Apply height scaling
     const effectiveScale = SCALE * heightScale;
-    const scaledAscent = ascent * heightScale;
-    const scaledXOffset = xOffset * heightScale;
+    // Don't scale ascent/xOffset here, pass original values
 
     // Tính toán Advance Width chuẩn với height scaling
     // +1 để tạo khoảng thở tự nhiên, nếu muốn khít thì bỏ +1
     const horizAdvX = Math.round((xOffset + charData.width + 1) * effectiveScale);
 
-    const finalPath = transformPathToFontCoords(rawPath, effectiveScale, scaledAscent, scaledXOffset);
+    const finalPath = transformPathToFontCoords(rawPath, effectiveScale, ascent, xOffset);
 
     // 5. Tạo SVG Content cho Font
     const codePoint = charData.unicode.codePointAt(0);

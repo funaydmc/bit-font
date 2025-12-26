@@ -116,11 +116,10 @@ async function generateFont(charDataList, options) {
         if (charData.type === 'bitmap' && bitmapToUse && bitmapToUse.length > 0) {
             const rawPath = bitmapToSVGPath(bitmapToUse);
             if (rawPath) {
-                // Scale ascent proportionally with height
+                // Do NOT scale ascent/xOffset here. They are in coordinate space of bitmap/rawPath.
+                // The scaling happens in transformPathToFontCoords via effectiveScale.
                 const ascent = charData.ascent !== undefined ? charData.ascent : (charData.height - 1);
-                const scaledAscent = ascent * heightScale;
-                const scaledXOffset = xOffset * heightScale;
-                d = transformPathToFontCoords(rawPath, effectiveScale, scaledAscent, scaledXOffset);
+                d = transformPathToFontCoords(rawPath, effectiveScale, ascent, xOffset);
             }
         } else if (charData.type === 'space') {
             horizAdvX = visualWidth * effectiveScale;
