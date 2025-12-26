@@ -1,14 +1,14 @@
 
 @font-face {
     font-family: 'Minecraft Custom';
-    src: url('MinecraftFont.woff2') format('woff2');
+    src: url('font/MinecraftFont.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Minecraft Custom';
-    src: url('MinecraftFont-Bold.woff2') format('woff2');
+    src: url('font/MinecraftFont-Bold.woff2') format('woff2');
     font-weight: bold;
     font-style: normal;
 }
