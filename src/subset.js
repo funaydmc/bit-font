@@ -4,8 +4,6 @@ const fs = require('fs');
 
 // Các bộ ký tự
 const CHARSETS = {
-    ascii: `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:'",.<>/?\\ `,
-
     vi: `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789` +
         `ÀÁÂÃĂẠẢẤẦẨẪẬẮẰẲẴẶÈÉÊẸẺẼẾỀỂỄỆÌÍỊỈĨÒÓÔÕƠỌỎỐỒỔỖỘỚỜỞỠỢÙÚƯỤỦỨỪỬỮỰỲÝỴỶỸ` +
         `àáâãăạảấầẩẫậắằẳẵặèéêẹẻẽếềểễệìíịỉĩòóôõơọỏốồổỗộớờởỡợùúưụủứừửữựỳýỵỷỹ` +
