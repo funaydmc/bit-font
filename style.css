@@ -1,9 +1,43 @@
+/* Font Declarations */
+@font-face {
+    font-family: 'Minecraft Custom';
+    src: url('font/MinecraftFont.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Minecraft Custom';
+    src: url('font/MinecraftFont-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+}
+
+/* Minecraft Color Variables */
 :root {
     --bg-color: #121212;
     --surface-color: #1e1e1e;
     --primary-color: #4caf50;
     --text-color: #e0e0e0;
     --border-color: #333;
+
+    /* Minecraft Colors */
+    --mc-black: #000000;
+    --mc-dark-blue: #0000AA;
+    --mc-dark-green: #00AA00;
+    --mc-dark-aqua: #00AAAA;
+    --mc-dark-red: #AA0000;
+    --mc-dark-purple: #AA00AA;
+    --mc-gold: #FFAA00;
+    --mc-gray: #AAAAAA;
+    --mc-dark-gray: #555555;
+    --mc-blue: #5555FF;
+    --mc-green: #55FF55;
+    --mc-aqua: #55FFFF;
+    --mc-red: #FF5555;
+    --mc-light-purple: #FF55FF;
+    --mc-yellow: #FFFF55;
+    --mc-white: #FFFFFF;
 }
 
 body {
@@ -35,31 +69,6 @@ h1 {
     font-weight: 300;
     letter-spacing: 1px;
     color: var(--primary-color);
-}
-
-.controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-}
-
-.control-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    user-select: none;
-}
-
-input[type="checkbox"] {
-    accent-color: var(--primary-color);
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
 }
 
 .preview-area {
@@ -110,30 +119,87 @@ textarea:focus {
     word-wrap: break-word;
 }
 
-/* Custom color tags for Minecraft colors */
+/* Minecraft Color Tags */
+black {
+    color: var(--mc-black);
+}
+
+dark_blue {
+    color: var(--mc-dark-blue);
+}
+
+dark_green {
+    color: var(--mc-dark-green);
+}
+
+dark_aqua {
+    color: var(--mc-dark-aqua);
+}
+
+dark_red {
+    color: var(--mc-dark-red);
+}
+
+dark_purple {
+    color: var(--mc-dark-purple);
+}
+
+gold {
+    color: var(--mc-gold);
+}
+
+gray {
+    color: var(--mc-gray);
+}
+
+dark_gray {
+    color: var(--mc-dark-gray);
+}
+
+blue {
+    color: var(--mc-blue);
+}
+
+green {
+    color: var(--mc-green);
+}
+
+aqua {
+    color: var(--mc-aqua);
+}
+
+red {
+    color: var(--mc-red);
+}
+
+light_purple {
+    color: var(--mc-light-purple);
+}
+
 yellow {
-    color: #FFFF55;
+    color: var(--mc-yellow);
 }
 
-/* Classes for toggling */
-.is-bold {
-    font-weight: bold;
+white {
+    color: var(--mc-white);
 }
 
-.is-italic {
-    font-style: italic;
+/* Obfuscated text animation */
+.obfuscated {
+    display: inline-block;
+    animation: obfuscate 0.1s infinite;
 }
 
-.is-underline {
-    text-decoration: underline;
-}
+@keyframes obfuscate {
 
-.is-strikethrough {
-    text-decoration: line-through;
-}
+    0%,
+    100% {
+        opacity: 1;
+    }
 
-.is-underline.is-strikethrough {
-    text-decoration: underline line-through;
+    50% {
+        opacity: 0.8;
+    }
 }
 
 .footer {

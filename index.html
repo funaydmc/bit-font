@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Font Tester</title>
-    <link rel="stylesheet" href="text.css">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -14,36 +13,18 @@
     <div class="container">
         <h1>Minecraft Font Tester</h1>
 
-        <div class="controls">
-            <label class="control-group">
-                <input type="checkbox" id="bold-check">
-                <span>Bold</span>
-            </label>
-            <label class="control-group">
-                <input type="checkbox" id="italic-check">
-                <span>Italic</span>
-            </label>
-            <label class="control-group">
-                <input type="checkbox" id="underline-check">
-                <span>Underline</span>
-            </label>
-            <label class="control-group">
-                <input type="checkbox" id="strikethrough-check">
-                <span>Strikethrough</span>
-            </label>
-        </div>
-
         <div class="preview-area">
-            <textarea id="preview-text" rows="10" spellcheck="false" placeholder="Type here to test the font...
-Try typing: Hello World!
-1234567890
-!@#$%^&*()">
-<yellow><b>Chọn server</b></yellow>
+            <textarea id="preview-text" rows="10" spellcheck="false" placeholder="Use MiniMessage format:
+<red>Red text</red> <blue>Blue text</blue>
+<bold>Bold</bold> <italic>Italic</italic>
+<#FF5555>Hex colors supported!
+<yellow><u>Underlined yellow</u></yellow>
+<st>Strikethrough</st> <obf>Obfuscated</obf>"><yellow><bold>Chọn server</bold></yellow>
 
 Nhấn để chọn server
-Unbreakable
-minecraft:compass
-13 component(s)
+<gray>Unbreakable</gray>
+<aqua>minecraft:compass</aqua>
+<dark_gray>13 component(s)</dark_gray>
 </textarea>
             <div class="item-lore">
 
