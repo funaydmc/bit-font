@@ -84,6 +84,12 @@ async function generateFont(charDataList, options) {
         let xOffset = charData.xOffset || 0;
         let bitmapToUse = charData.bitmap;
 
+        // Calculate height-based scale factor
+        // Normalize all characters to 8px height standard
+        // height=8 -> scale=1, height=4 -> scale=2, height=16 -> scale=0.5
+        const providerHeight = charData.height || 8;
+        const heightScale = 8 / providerHeight;
+
         // Apply Bold Transformation
         if (isBold && charData.type === 'bitmap') {
             bitmapToUse = transformBitmapBold(charData.bitmap);
@@ -100,18 +106,24 @@ async function generateFont(charDataList, options) {
             visualWidth += 1;
         }
 
-        // Calculate Advance Width
+        // Apply height scale to effective SCALE
+        const effectiveScale = SCALE * heightScale;
+
+        // Calculate Advance Width with height scaling
         // Default spacing logic: (xOffset + Width + 1px spacing)
-        let horizAdvX = (xOffset + visualWidth + 1) * SCALE;
+        let horizAdvX = (xOffset + visualWidth + 1) * effectiveScale;
 
         if (charData.type === 'bitmap' && bitmapToUse && bitmapToUse.length > 0) {
             const rawPath = bitmapToSVGPath(bitmapToUse);
             if (rawPath) {
+                // Scale ascent proportionally with height
                 const ascent = charData.ascent !== undefined ? charData.ascent : (charData.height - 1);
-                d = transformPathToFontCoords(rawPath, SCALE, ascent, xOffset);
+                const scaledAscent = ascent * heightScale;
+                const scaledXOffset = xOffset * heightScale;
+                d = transformPathToFontCoords(rawPath, effectiveScale, scaledAscent, scaledXOffset);
             }
         } else if (charData.type === 'space') {
-            horizAdvX = visualWidth * SCALE;
+            horizAdvX = visualWidth * effectiveScale;
         }
 
         const unicodeHex = `&#x${codePoint.toString(16).toUpperCase()};`;

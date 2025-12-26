@@ -42,14 +42,13 @@ async function debugAndBuildOneChar(targetChar) {
     console.log(`\n=== ĐANG DEBUG VÀ BUILD KÝ TỰ: '${targetChar}' ===`);
 
     // 1. Lấy dữ liệu
-    // OPTIMIZATION: Manually load specific parts to avoid loading entire Unifont for debugging
-    // If fontProcess exposes internal methods, use them. Otherwise fallback to main()
+    // Load using the same reference as main() to ensure all characters are available
     let charDataList;
     if (fontProcess.processReference && fontProcess.charList) {
-        console.log("Using optimized loading (skipping Unifont)...");
+        console.log("Using optimized loading...");
         fontProcess.charList.length = 0;
         fontProcess.processedCodes.clear();
-        await fontProcess.processReference('minecraft:include/default');
+        await fontProcess.processReference('minecraft:default');
         charDataList = fontProcess.charList;
     } else {
         console.log("Using full main() loading...");
@@ -65,13 +64,26 @@ async function debugAndBuildOneChar(targetChar) {
 
     // 2. In thông tin cơ bản
     console.log(`\n--- INFO ---`);
-    console.log(`Width: ${charData.width}, Height: ${charData.height}, Ascent: ${charData.ascent}`);
-    console.log(`xOffset (Padding Left): ${charData.xOffset || 0}`);
+    console.log(`Ascent (from provider): ${charData.ascent}`);
+    console.log(`Height (from provider): ${charData.height}`);
 
     if (charData.type !== 'bitmap') {
         console.log("Không phải Bitmap, bỏ qua.");
         return;
     }
+
+    // Calculate bounded dimensions from bitmap
+    const b_height = charData.bitmap ? charData.bitmap.length : 0;
+    const b_width = charData.width || 0; // This is already the bounded width from extractBitmap
+
+    console.log(`b_height (bounded from bitmap): ${b_height}`);
+    console.log(`b_width (bounded from bitmap): ${b_width}`);
+    console.log(`xOffset (Padding Left): ${charData.xOffset || 0}`);
+
+    // Calculate height-based scale factor (same as index.js)
+    const providerHeight = charData.height || 8;
+    const heightScale = 8 / providerHeight;
+    console.log(`\nHeight Scale Factor: ${heightScale} (${providerHeight}px -> 8px)`);
 
     // 3. In Bitmap
     printVisualBitmap(charData.bitmap);
@@ -86,11 +98,16 @@ async function debugAndBuildOneChar(targetChar) {
     const ascent = charData.ascent !== undefined ? charData.ascent : (charData.height - 1);
     const xOffset = charData.xOffset || 0;
 
-    // Tính toán Advance Width chuẩn
-    // +1 để tạo khoảng thở tự nhiên, nếu muốn khít thì bỏ +1
-    const horizAdvX = Math.round((xOffset + charData.width + 1) * SCALE);
+    // Apply height scaling
+    const effectiveScale = SCALE * heightScale;
+    const scaledAscent = ascent * heightScale;
+    const scaledXOffset = xOffset * heightScale;
 
-    const finalPath = transformPathToFontCoords(rawPath, SCALE, ascent, xOffset);
+    // Tính toán Advance Width chuẩn với height scaling
+    // +1 để tạo khoảng thở tự nhiên, nếu muốn khít thì bỏ +1
+    const horizAdvX = Math.round((xOffset + charData.width + 1) * effectiveScale);
+
+    const finalPath = transformPathToFontCoords(rawPath, effectiveScale, scaledAscent, scaledXOffset);
 
     // 5. Tạo SVG Content cho Font
     const codePoint = charData.unicode.codePointAt(0);
@@ -148,5 +165,6 @@ async function debugAndBuildOneChar(targetChar) {
     }
 }
 
-// Chạy debug cho chữ 'B' (hoặc thay đổi ký tự bạn muốn)
 debugAndBuildOneChar('B');
+debugAndBuildOneChar('✦');
+
