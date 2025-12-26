@@ -11,18 +11,6 @@ const BitmapProcessor = require('./bitmap-processor');
 const processUnifont = require('./unifont');
 const logger = require('../utils/logger');
 
-/**
- * @module core/font-loader
- * Handles loading of font data from JSON configuration and PNG textures.
- */
-
-const fs = require('fs');
-const path = require('path');
-const { PNG } = require('pngjs');
-const CONFIG = require('../config');
-const BitmapProcessor = require('./bitmap-processor');
-const processUnifont = require('./unifont');
-const logger = require('../utils/logger');
 
 class FontLoader {
     constructor() {
