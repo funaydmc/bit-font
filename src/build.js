@@ -15,6 +15,11 @@ const SvgGenerator = require('./core/svg-generator');
 const FontBuilder = require('./core/font-builder');
 const Subsetter = require('./core/subsetter');
 
+/**
+ * Build a single font variant (Regular or Bold).
+ * @param {BitFont.CharData[]} charDataList 
+ * @param {boolean} isBold 
+ */
 async function buildVariant(charDataList, isBold) {
     const variantName = isBold ? 'BOLD' : 'REGULAR';
     const fileName = isBold ? 'MinecraftFont-Bold.woff2' : 'MinecraftFont.woff2';

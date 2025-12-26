@@ -9,7 +9,7 @@ const BitmapProcessor = require('./bitmap-processor');
 class SvgGenerator {
     /**
      * Generate the complete SVG content for a font variant.
-     * @param {Array<Object>} charDataList - List of character data.
+     * @param {BitFont.CharData[]} charDataList - List of character data.
      * @param {boolean} isBold - Whether to generate bold variant.
      * @returns {string} The complete SVG string.
      */
@@ -30,7 +30,7 @@ class SvgGenerator {
 
     /**
      * Create the XML string for a single glyph.
-     * @param {Object} charData 
+     * @param {BitFont.CharData} charData 
      * @param {boolean} isBold 
      * @returns {string}
      */

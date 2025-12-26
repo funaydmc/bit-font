@@ -6,12 +6,12 @@
 class BitmapProcessor {
     /**
      * Extract a bitmap from an image buffer at specified coordinates.
-     * @param {Object} image - The source image object { width, height, data }.
+     * @param {BitFont.PNGData} image - The source image object { width, height, data }.
      * @param {number} x - Starting x coordinate.
      * @param {number} y - Starting y coordinate.
      * @param {number} width - Width of the area to extract.
      * @param {number} height - Height of the area to extract.
-     * @returns {Object} Extracted bitmap data { pixels, width, xOffset, isEmpty }.
+     * @returns {BitFont.ExtractedBitmap} Extracted bitmap data { pixels, width, xOffset, isEmpty }.
      */
     static extractBitmap(image, x, y, width, height) {
         let minX = width, maxX = -1;

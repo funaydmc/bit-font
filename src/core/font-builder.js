@@ -19,7 +19,7 @@ class FontBuilder {
     /**
      * Create a Font object from SVG content.
      * @param {string} svgContent 
-     * @returns {Object} Font object.
+     * @returns {BitFont.FontEditorFont} Font object.
      */
     static createFont(svgContent) {
         return Font.create(svgContent, {
@@ -30,7 +30,7 @@ class FontBuilder {
 
     /**
      * Set standard metadata for the font.
-     * @param {Object} fontObj 
+     * @param {BitFont.FontEditorFont} fontObj 
      * @param {boolean} isBold 
      */
     static setMetadata(fontObj, isBold) {
@@ -44,7 +44,7 @@ class FontBuilder {
 
     /**
      * Write WOFF2 file.
-     * @param {Object} fontObj 
+     * @param {BitFont.FontEditorFont} fontObj 
      * @param {string} outputPath 
      */
     static writeWOFF2(fontObj, outputPath) {
@@ -60,7 +60,7 @@ class FontBuilder {
 
     /**
      * Write TTF file (helper for subsetting).
-     * @param {Object} fontObj 
+     * @param {BitFont.FontEditorFont} fontObj 
      * @param {string} outputPath 
      */
     static writeTTF(fontObj, outputPath) {

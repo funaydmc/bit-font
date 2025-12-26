@@ -9,7 +9,7 @@ const BitmapProcessor = require('./bitmap-processor');
 
 /**
  * Process Unifont provider.
- * @param {Object} loader - The FontLoader instance.
+ * @param {typeof import('./font-loader')} loader - The FontLoader instance.
  */
 async function processUnifont(loader) {
     for (let i = 0; i < 256; i++) {

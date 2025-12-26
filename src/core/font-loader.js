@@ -11,15 +11,29 @@ const BitmapProcessor = require('./bitmap-processor');
 const processUnifont = require('./unifont');
 const logger = require('../utils/logger');
 
+/**
+ * @module core/font-loader
+ * Handles loading of font data from JSON configuration and PNG textures.
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { PNG } = require('pngjs');
+const CONFIG = require('../config');
+const BitmapProcessor = require('./bitmap-processor');
+const processUnifont = require('./unifont');
+const logger = require('../utils/logger');
+
 class FontLoader {
     constructor() {
+        /** @type {BitFont.CharData[]} */
         this.charList = [];
         this.processedCodes = new Set();
     }
 
     /**
      * Main entry point to load all font data.
-     * @returns {Promise<Array<Object>>} List of character data objects.
+     * @returns {Promise<BitFont.CharData[]>} List of character data objects.
      */
     async loadAll() {
         logger.info('Starting font loading...');
@@ -76,7 +90,7 @@ class FontLoader {
 
     /**
      * Process a single provider object.
-     * @param {Object} provider 
+     * @param {BitFont.Provider} provider 
      */
     async processProvider(provider) {
         switch (provider.type) {
@@ -94,7 +108,7 @@ class FontLoader {
 
     /**
      * Process a bitmap provider.
-     * @param {Object} provider 
+     * @param {BitFont.BitmapProvider} provider 
      */
     async processBitmapProvider(provider) {
         const file = provider.file.replace('minecraft:font/', '');
@@ -138,7 +152,7 @@ class FontLoader {
 
     /**
      * Process a space provider.
-     * @param {Object} provider 
+     * @param {BitFont.SpaceProvider} provider 
      */
     processSpaceProvider(provider) {
         for (const [char, advance] of Object.entries(provider.advances)) {
@@ -155,7 +169,7 @@ class FontLoader {
     /**
      * Helper to parse PNG file.
      * @param {string} imagePath 
-     * @returns {Promise<Object>}
+     * @returns {Promise<BitFont.PNGData|null>}
      */
     parsePng(imagePath) {
         return new Promise((resolve) => {
@@ -177,7 +191,7 @@ class FontLoader {
 
     /**
      * Add a character to the list if valid.
-     * @param {Object} charData 
+     * @param {BitFont.CharData} charData 
      */
     addChar(charData) {
         if (!charData.unicode || charData.unicode === '\u0000' || charData.unicode.codePointAt(0) === 0) return;

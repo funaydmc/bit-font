@@ -14,6 +14,7 @@ class Subsetter {
      * Create subsets for a given font file.
      * @param {string} sourceFontPath - Path to the source TTF file.
      * @param {string} outputDir - Directory to save subsets.
+     * @returns {Promise<void>}
      */
     static async createSubsets(sourceFontPath, outputDir) {
         if (!fs.existsSync(sourceFontPath)) {
@@ -38,6 +39,7 @@ class Subsetter {
      * @param {string} sourcePath 
      * @param {string} outputDir 
      * @param {string} mode - Subset mode/key (e.g., 'vi').
+     * @returns {Promise<string>} Path to the generated subset file.
      */
     static createSingleSubset(sourcePath, outputDir, mode) {
         return new Promise((resolve, reject) => {

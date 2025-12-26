@@ -41,6 +41,10 @@ console.warn = function (...args) {
     logToFile(['WARN:', ...args]);
 };
 
+/**
+ * Debug and build a font containing only the characters in the target string.
+ * @param {string} targetString - The string to use for debugging characters.
+ */
 async function debugAndBuildString(targetString) {
     console.log(`\n=== DEBUGGING STRING: '${targetString}' ===`);
 
