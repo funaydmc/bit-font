@@ -85,10 +85,15 @@ async function generateFont(charDataList, options) {
         let bitmapToUse = charData.bitmap;
 
         // Calculate height-based scale factor
-        // Normalize all characters to 8px height standard
-        // height=8 -> scale=1, height=4 -> scale=2, height=16 -> scale=0.5
+        // Only scale Unifont (height=16) down to 8px. 
+        // Accented chars (height=12) should use scale 1.0 to preserve body size (they are just taller).
         const providerHeight = charData.height || 8;
-        const heightScale = 8 / providerHeight;
+        let heightScale = 1.0;
+
+        if (providerHeight === 16) {
+            heightScale = 0.5; // Normalize 16px (Unifont) to 8px
+        }
+        // else: keep 1.0 (for 8px, 12px, etc)
 
         // Apply Bold Transformation
         if (isBold && charData.type === 'bitmap') {

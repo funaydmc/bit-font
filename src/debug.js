@@ -27,6 +27,39 @@ function printVisualBitmap(bitmap) {
     console.log("------------------------------------");
 }
 
+const LOG_FILE = 'debug_output.log';
+// Clear log file
+if (fs.existsSync(LOG_FILE)) fs.unlinkSync(LOG_FILE);
+
+function log(msg) {
+    console.log(msg);
+    fs.appendFileSync(LOG_FILE, msg + '\n');
+}
+
+// Thay thế console.log bằng log trong các bước quan trọng (hoặc override console.log)
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
+
+function logToFile(args) {
+    fs.appendFileSync(LOG_FILE, args.join(' ') + '\n');
+}
+
+console.log = function (...args) {
+    originalLog.apply(console, args);
+    logToFile(args);
+};
+
+console.error = function (...args) {
+    originalError.apply(console, args);
+    logToFile(['ERROR:', ...args]);
+};
+
+console.warn = function (...args) {
+    originalWarn.apply(console, args);
+    logToFile(['WARN:', ...args]);
+};
+
 // Hàm transform (giữ nguyên logic đã sửa)
 function transformPathToFontCoords(d, scale, ascentPixel, xOffsetPixel) {
     return d.replace(/([ML])\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)/g, (match, command, x, y) => {
@@ -38,8 +71,8 @@ function transformPathToFontCoords(d, scale, ascentPixel, xOffsetPixel) {
     });
 }
 
-async function debugAndBuildOneChar(targetChar) {
-    console.log(`\n=== ĐANG DEBUG VÀ BUILD KÝ TỰ: '${targetChar}' ===`);
+async function debugAndBuildString(targetString) {
+    console.log(`\n=== ĐANG DEBUG VÀ BUILD STRING: '${targetString}' ===`);
 
     // 1. Lấy dữ liệu
     // Load using the same reference as main() to ensure all characters are available
@@ -55,67 +88,79 @@ async function debugAndBuildOneChar(targetChar) {
         charDataList = await fontProcess.main();
     }
 
-    const charData = charDataList.find(c => c.unicode === targetChar);
+    const targetChars = Array.from(targetString); // Handle unicode surrogate pairs correctly
+    let glyphsXML = '';
 
-    if (!charData) {
-        console.error(`LỖI: Không tìm thấy ký tự '${targetChar}'!`);
-        return;
+    // Process each character
+    for (const char of targetChars) {
+        const charData = charDataList.find(c => c.unicode === char);
+
+        if (!charData) {
+            console.warn(`WARNING: Không tìm thấy ký tự '${char}'! Skipping.`);
+            continue;
+        }
+
+        console.log(`\n--- PROCESSING CHAR: '${char}' ---`);
+        console.log(`Ascent (from provider): ${charData.ascent}`);
+        console.log(`Height (from provider): ${charData.height}`);
+
+        if (charData.type === 'bitmap') {
+            // Calculate bounded dimensions from bitmap
+            const b_height = charData.bitmap ? charData.bitmap.length : 0;
+            const b_width = charData.width || 0;
+
+            console.log(`b_height: ${b_height}, b_width: ${b_width}, xOffset: ${charData.xOffset || 0}`);
+            // printVisualBitmap(charData.bitmap); // Optional: uncomment if too noisy
+        }
+
+        // Calculate height-based scale factor (same as index.js)
+        const providerHeight = charData.height || 8;
+        let heightScale = 1.0;
+        if (providerHeight === 16) {
+            heightScale = 0.5;
+        }
+
+        console.log(`Height Scale Factor: ${heightScale} (${providerHeight}px -> ${providerHeight * heightScale / (1 / 8)}px equiv)`);
+
+        let d = '';
+        let visualWidth = charData.width || 0;
+        let xOffset = charData.xOffset || 0;
+        let bitmapToUse = charData.bitmap;
+
+        // Note: Bold logic is omitted in debug for simplicity unless needed
+
+        const effectiveScale = SCALE * heightScale;
+
+        // Calculate Advance Width
+        // Default spacing logic: (xOffset + Width + 1px spacing)
+        // Space char also uses effectiveScale
+        let horizAdvX;
+
+        if (charData.type === 'space') {
+            horizAdvX = visualWidth * effectiveScale;
+        } else {
+            horizAdvX = Math.round((xOffset + visualWidth + 1) * effectiveScale); // +1 spacing
+        }
+
+        if (charData.type === 'bitmap' && bitmapToUse && bitmapToUse.length > 0) {
+            const rawPath = bitmapToSVGPath(bitmapToUse);
+            if (rawPath) {
+                // Do NOT scale ascent/xOffset here. They are in coordinate space of bitmap/rawPath.
+                const ascent = charData.ascent !== undefined ? charData.ascent : (charData.height - 1);
+                d = transformPathToFontCoords(rawPath, effectiveScale, ascent, xOffset);
+            }
+        }
+
+        const codePoint = charData.unicode.codePointAt(0);
+        const unicodeHex = `&#x${codePoint.toString(16).toUpperCase()};`;
+        const glyphName = `uni${codePoint.toString(16).toUpperCase()}`;
+
+        if (d) {
+            glyphsXML += `<glyph glyph-name="${glyphName}" unicode="${unicodeHex}" d="${d}" horiz-adv-x="${Math.round(horizAdvX)}" />\n`;
+        } else {
+            glyphsXML += `<glyph glyph-name="${glyphName}" unicode="${unicodeHex}" horiz-adv-x="${Math.round(horizAdvX)}" />\n`;
+        }
     }
-
-    // 2. In thông tin cơ bản
-    console.log(`\n--- INFO ---`);
-    console.log(`Ascent (from provider): ${charData.ascent}`);
-    console.log(`Height (from provider): ${charData.height}`);
-
-    if (charData.type !== 'bitmap') {
-        console.log("Không phải Bitmap, bỏ qua.");
-        return;
-    }
-
-    // Calculate bounded dimensions from bitmap
-    const b_height = charData.bitmap ? charData.bitmap.length : 0;
-    const b_width = charData.width || 0; // This is already the bounded width from extractBitmap
-
-    console.log(`b_height (bounded from bitmap): ${b_height}`);
-    console.log(`b_width (bounded from bitmap): ${b_width}`);
-    console.log(`xOffset (Padding Left): ${charData.xOffset || 0}`);
-
-    // Calculate height-based scale factor (same as index.js)
-    const providerHeight = charData.height || 8;
-    const heightScale = 8 / providerHeight;
-    console.log(`\nHeight Scale Factor: ${heightScale} (${providerHeight}px -> 8px)`);
-
-    // 3. In Bitmap
-    printVisualBitmap(charData.bitmap);
-
-    // 4. Tạo Path và Transform
-    const rawPath = bitmapToSVGPath(charData.bitmap);
-    if (!rawPath) {
-        console.error("Lỗi: Không tạo được SVG Path.");
-        return;
-    }
-
-    const ascent = charData.ascent !== undefined ? charData.ascent : (charData.height - 1);
-    const xOffset = charData.xOffset || 0;
-
-    // Apply height scaling
-    const effectiveScale = SCALE * heightScale;
-    // Don't scale ascent/xOffset here, pass original values
-
-    // Tính toán Advance Width chuẩn với height scaling
-    // +1 để tạo khoảng thở tự nhiên, nếu muốn khít thì bỏ +1
-    const horizAdvX = Math.round((xOffset + charData.width + 1) * effectiveScale);
-
-    const finalPath = transformPathToFontCoords(rawPath, effectiveScale, ascent, xOffset);
-
-    // 5. Tạo SVG Content cho Font
-    const codePoint = charData.unicode.codePointAt(0);
-    const unicodeHex = `&#x${codePoint.toString(16).toUpperCase()};`;
-    const glyphName = `uni${codePoint.toString(16).toUpperCase()}`;
-
-    // Log thẻ Glyph để kiểm tra
-    const glyphTag = `<glyph glyph-name="${glyphName}" unicode="${unicodeHex}" d="${finalPath}" horiz-adv-x="${horizAdvX}" />`;
-    console.log(`\n--- GLYPH XML ---\n${glyphTag}`);
 
     const svgContent = `<?xml version="1.0" standalone="no"?>
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -129,14 +174,14 @@ async function debugAndBuildOneChar(targetChar) {
                     descent="0" 
                 />
                 <glyph glyph-name=".notdef" horiz-adv-x="${Math.round(8 * SCALE)}" />
-                ${glyphTag} 
+                ${glyphsXML} 
             </font>
         </defs>
     </svg>`;
 
     // 6. Compile ra file TTF
     console.log(`\n--- ĐANG BUILD FILE TTF ---`);
-    const outputFileName = `DebugFont_${targetChar === ' ' ? 'Space' : targetChar}.ttf`;
+    const outputFileName = `DebugFont_Mixed.ttf`;
 
     try {
         const fontObj = Font.create(svgContent, {
@@ -146,8 +191,8 @@ async function debugAndBuildOneChar(targetChar) {
 
         // Đặt tên hiển thị cho font
         const fontData = fontObj.get();
-        fontData.name.fontFamily = `Debug ${targetChar}`;
-        fontData.name.fullName = `Debug Minecraft ${targetChar}`;
+        fontData.name.fontFamily = `Debug Mixed`;
+        fontData.name.fullName = `Debug Minecraft Mixed`;
         fontObj.set(fontData);
 
         const ttfBuffer = fontObj.write({ type: 'ttf' });
@@ -155,15 +200,15 @@ async function debugAndBuildOneChar(targetChar) {
 
         console.log(`✅ THÀNH CÔNG!`);
         console.log(`👉 File đã tạo: ${outputFileName}`);
-        console.log(`Hãy mở file này lên để kiểm tra ký tự.`);
+        console.log(`Hãy mở file này lên để kiểm tra các ký tự: ${targetString}`);
 
     } catch (e) {
         console.error("❌ Lỗi khi compile font:", e);
         fs.writeFileSync('debug_error.svg', svgContent);
-        console.log("Đã lưu file 'debug_error.svg' để kiểm tra.");
     }
 }
 
-debugAndBuildOneChar('B');
-debugAndBuildOneChar('✦');
-
+// Example usage:
+// Arg 1: String to debug
+const targetStr = process.argv[2] || '✦★ Nhấnđểcọsver';
+debugAndBuildString(targetStr);
