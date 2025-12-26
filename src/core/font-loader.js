@@ -8,6 +8,7 @@ const path = require('path');
 const { PNG } = require('pngjs');
 const CONFIG = require('../config');
 const BitmapProcessor = require('./bitmap-processor');
+const processUnifont = require('./unifont');
 const logger = require('../utils/logger');
 
 class FontLoader {
@@ -45,20 +46,14 @@ class FontLoader {
      */
     async processReference(id) {
         if (id === 'minecraft:include/unifont') {
-            await this.processUnifont();
+            await processUnifont(this);
             return;
         }
 
-        const filename = id.split(':')[1].replace('include/', 'include-') + '.json';
+        const filename = id.split(':')[1] + '.json';
         const filePath = path.join(CONFIG.paths.fontDir, filename);
 
         if (!fs.existsSync(filePath)) {
-            // Fallback check
-            const altPath = path.join(CONFIG.paths.fontDir, id.split(':')[1] + '.json');
-            if (fs.existsSync(altPath)) {
-                await this.processFile(altPath);
-                return;
-            }
             logger.warn(`File not found: ${filePath} (ID: ${id})`);
             return;
         }
@@ -155,44 +150,7 @@ class FontLoader {
         }
     }
 
-    /**
-     * Process Unifont provider.
-     */
-    async processUnifont() {
-        for (let i = 0; i < 256; i++) {
-            const page = i.toString(16).padStart(2, '0');
-            const filename = `unicode_page_${page}.png`;
-            const imagePath = path.join(CONFIG.paths.textureDir, filename);
 
-            const image = await this.parsePng(imagePath);
-            if (image) {
-                const tileWidth = 16;
-                const tileHeight = 16;
-
-                for (let cy = 0; cy < 16; cy++) {
-                    for (let cx = 0; cx < 16; cx++) {
-                        const charCode = (i * 256) + (cy * 16) + cx;
-                        const char = String.fromCharCode(charCode);
-
-                        if (this.processedCodes.has(char)) continue;
-
-                        const charData = BitmapProcessor.extractBitmap(image, cx * tileWidth, cy * tileHeight, tileWidth, tileHeight);
-                        if (!charData.isEmpty) {
-                            this.addChar({
-                                unicode: char,
-                                type: 'bitmap',
-                                width: charData.width,
-                                height: CONFIG.unifontHeight,
-                                ascent: CONFIG.unifontAscent,
-                                bitmap: charData.pixels,
-                                xOffset: charData.xOffset
-                            });
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     /**
      * Helper to parse PNG file.
