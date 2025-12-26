@@ -1,49 +1,30 @@
 const fs = require('fs');
+const path = require('path');
 const { Font } = require('fonteditor-core');
-const fontProcess = require('./font'); // Import font.js
-const { bitmapToSVGPath } = require('./convert'); // Import convert.js
+const CONFIG = require('./config');
+const FontLoader = require('./core/font-loader');
+const BitmapProcessor = require('./core/bitmap-processor');
+const SvgGenerator = require('./core/svg-generator');
+const logger = require('./utils/logger');
 
-// Cấu hình
-const CONFIG = {
-    unitsPerEm: 1024,
-    pixelSize: 16,
-    outputFile: 'DebugFont.ttf', // Tên file output mặc định
-    fontFamily: 'Debug Font'
-};
-const SCALE = CONFIG.unitsPerEm / CONFIG.pixelSize;
-
-// Hàm in Bitmap ra console (giữ nguyên)
-function printVisualBitmap(bitmap) {
-    console.log("--- VISUAL BITMAP (█ = 1, . = 0) ---");
-    if (!bitmap || bitmap.length === 0) {
-        console.log("(Empty Bitmap)");
-        return;
-    }
-    console.log("   " + bitmap[0].map((_, i) => i % 10).join(''));
-    bitmap.forEach((row, index) => {
-        const line = row.map(pixel => pixel === 1 ? '█' : '.').join('');
-        console.log(`${index.toString().padStart(2, '0')} ${line}`);
-    });
-    console.log("------------------------------------");
+// Setup Coverage Directory
+const COVERAGE_DIR = path.join(__dirname, '../coverage');
+if (!fs.existsSync(COVERAGE_DIR)) {
+    fs.mkdirSync(COVERAGE_DIR, { recursive: true });
 }
 
-const LOG_FILE = 'debug_output.log';
+const LOG_FILE = path.join(COVERAGE_DIR, 'debug_output.log');
 // Clear log file
 if (fs.existsSync(LOG_FILE)) fs.unlinkSync(LOG_FILE);
-
-function log(msg) {
-    console.log(msg);
-    fs.appendFileSync(LOG_FILE, msg + '\n');
-}
-
-// Thay thế console.log bằng log trong các bước quan trọng (hoặc override console.log)
-const originalLog = console.log;
-const originalError = console.error;
-const originalWarn = console.warn;
 
 function logToFile(args) {
     fs.appendFileSync(LOG_FILE, args.join(' ') + '\n');
 }
+
+// Override console logging for debugging capture
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
 
 console.log = function (...args) {
     originalLog.apply(console, args);
@@ -60,128 +41,60 @@ console.warn = function (...args) {
     logToFile(['WARN:', ...args]);
 };
 
-// Hàm transform (giữ nguyên logic đã sửa)
-function transformPathToFontCoords(d, scale, ascentPixel, xOffsetPixel) {
-    return d.replace(/([ML])\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)/g, (match, command, x, y) => {
-        const pixelX = parseFloat(x);
-        const pixelY = parseFloat(y);
-        const fontX = (pixelX + xOffsetPixel) * scale;
-        const fontY = (ascentPixel - pixelY) * scale; // Lật trục Y
-        return `${command}${Math.round(fontX)} ${Math.round(fontY)}`;
-    });
-}
-
 async function debugAndBuildString(targetString) {
-    console.log(`\n=== ĐANG DEBUG VÀ BUILD STRING: '${targetString}' ===`);
+    console.log(`\n=== DEBUGGING STRING: '${targetString}' ===`);
 
-    // 1. Lấy dữ liệu
-    // Load using the same reference as main() to ensure all characters are available
-    let charDataList;
-    if (fontProcess.processReference && fontProcess.charList) {
-        console.log("Using optimized loading...");
-        fontProcess.charList.length = 0;
-        fontProcess.processedCodes.clear();
-        await fontProcess.processReference('minecraft:default');
-        charDataList = fontProcess.charList;
-    } else {
-        console.log("Using full main() loading...");
-        charDataList = await fontProcess.main();
+    // 1. Load Data (Optimized or Full)
+    // For debug, we can try to find specific chars or just load defaults
+    // Here we load default to ensure we have the specific user set
+    // Using FontLoader singleton
+
+    // We can manually trigger a load if needed, or check if populated
+    // Since FontLoader is a singleton, we can just call loadAll() or use specific method if we expose it
+    // But FontLoader.loadAll() re-clears list.
+    // Let's just call loadAll() for simplicity in this debug script version
+
+    // Optimization: If targetString is small, maybe we only want to load relevant files? 
+    // But dependencies are complex. Let's just load all for now as it takes ~few seconds.
+    // Or we can try to reuse the FontLoader if it exported 'processReference'. 
+
+    // Let's stick to full load for correctness:
+    if (FontLoader.charList.length === 0) {
+        console.log("Loading all font data...");
+        await FontLoader.loadAll();
     }
+    const charDataList = FontLoader.charList;
 
-    const targetChars = Array.from(targetString); // Handle unicode surrogate pairs correctly
+    // Filter duplicates
+    const uniqueChars = Array.from(new Set(targetString));
+    console.log(`Unique characters to process: ${uniqueChars.join('')}`);
+
     let glyphsXML = '';
 
     // Process each character
-    for (const char of targetChars) {
+    for (const char of uniqueChars) {
         const charData = charDataList.find(c => c.unicode === char);
 
         if (!charData) {
-            console.warn(`WARNING: Không tìm thấy ký tự '${char}'! Skipping.`);
+            console.warn(`WARNING: Character '${char}' not found! Skipping.`);
             continue;
         }
 
         console.log(`\n--- PROCESSING CHAR: '${char}' ---`);
-        console.log(`Ascent (from provider): ${charData.ascent}`);
-        console.log(`Height (from provider): ${charData.height}`);
+        console.log(`Ascent: ${charData.ascent}, Height: ${charData.height}, Width: ${charData.width}`);
 
-        if (charData.type === 'bitmap') {
-            // Calculate bounded dimensions from bitmap
-            const b_height = charData.bitmap ? charData.bitmap.length : 0;
-            const b_width = charData.width || 0;
-
-            console.log(`b_height: ${b_height}, b_width: ${b_width}, xOffset: ${charData.xOffset || 0}`);
-            // printVisualBitmap(charData.bitmap); // Optional: uncomment if too noisy
-        }
-
-        // Calculate height-based scale factor (same as index.js)
-        const providerHeight = charData.height || 8;
-        let heightScale = 1.0;
-        if (providerHeight === 16) {
-            heightScale = 0.5;
-        }
-
-        console.log(`Height Scale Factor: ${heightScale} (${providerHeight}px -> ${providerHeight * heightScale / (1 / 8)}px equiv)`);
-
-        let d = '';
-        let visualWidth = charData.width || 0;
-        let xOffset = charData.xOffset || 0;
-        let bitmapToUse = charData.bitmap;
-
-        // Note: Bold logic is omitted in debug for simplicity unless needed
-
-        const effectiveScale = SCALE * heightScale;
-
-        // Calculate Advance Width
-        // Default spacing logic: (xOffset + Width + 1px spacing)
-        // Space char also uses effectiveScale
-        let horizAdvX;
-
-        if (charData.type === 'space') {
-            horizAdvX = visualWidth * effectiveScale;
-        } else {
-            horizAdvX = Math.round((xOffset + visualWidth + 1) * effectiveScale); // +1 spacing
-        }
-
-        if (charData.type === 'bitmap' && bitmapToUse && bitmapToUse.length > 0) {
-            const rawPath = bitmapToSVGPath(bitmapToUse);
-            if (rawPath) {
-                // Do NOT scale ascent/xOffset here. They are in coordinate space of bitmap/rawPath.
-                const ascent = charData.ascent !== undefined ? charData.ascent : (charData.height - 1);
-                d = transformPathToFontCoords(rawPath, effectiveScale, ascent, xOffset);
-            }
-        }
-
-        const codePoint = charData.unicode.codePointAt(0);
-        const unicodeHex = `&#x${codePoint.toString(16).toUpperCase()};`;
-        const glyphName = `uni${codePoint.toString(16).toUpperCase()}`;
-
-        if (d) {
-            glyphsXML += `<glyph glyph-name="${glyphName}" unicode="${unicodeHex}" d="${d}" horiz-adv-x="${Math.round(horizAdvX)}" />\n`;
-        } else {
-            glyphsXML += `<glyph glyph-name="${glyphName}" unicode="${unicodeHex}" horiz-adv-x="${Math.round(horizAdvX)}" />\n`;
-        }
+        // Use SvgGenerator logic to create glyph XML
+        // We can expose createGlyphXML from SvgGenerator or just copy the logic/use generate()
+        // SvgGenerator.createGlyphXML is static, so we can use it.
+        const glyphXML = SvgGenerator.createGlyphXML(charData, false); // False for regular
+        glyphsXML += glyphXML;
     }
 
-    const svgContent = `<?xml version="1.0" standalone="no"?>
-    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-    <svg xmlns="http://www.w3.org/2000/svg">
-        <defs>
-            <font id="DebugFont" horiz-adv-x="${Math.round(8 * SCALE)}">
-                <font-face 
-                    font-family="${CONFIG.fontFamily}" 
-                    units-per-em="${CONFIG.unitsPerEm}" 
-                    ascent="${CONFIG.unitsPerEm}" 
-                    descent="0" 
-                />
-                <glyph glyph-name=".notdef" horiz-adv-x="${Math.round(8 * SCALE)}" />
-                ${glyphsXML} 
-            </font>
-        </defs>
-    </svg>`;
+    const svgContent = SvgGenerator.createFontXML(glyphsXML, false);
 
-    // 6. Compile ra file TTF
-    console.log(`\n--- ĐANG BUILD FILE TTF ---`);
-    const outputFileName = `DebugFont_Mixed.ttf`;
+    // Write output
+    console.log(`\n--- BUILDING TTF ---`);
+    const outputFileName = path.join(COVERAGE_DIR, `DebugFont_Mixed.ttf`);
 
     try {
         const fontObj = Font.create(svgContent, {
@@ -189,7 +102,6 @@ async function debugAndBuildString(targetString) {
             hinting: true
         });
 
-        // Đặt tên hiển thị cho font
         const fontData = fontObj.get();
         fontData.name.fontFamily = `Debug Mixed`;
         fontData.name.fullName = `Debug Minecraft Mixed`;
@@ -198,17 +110,14 @@ async function debugAndBuildString(targetString) {
         const ttfBuffer = fontObj.write({ type: 'ttf' });
         fs.writeFileSync(outputFileName, ttfBuffer);
 
-        console.log(`✅ THÀNH CÔNG!`);
-        console.log(`👉 File đã tạo: ${outputFileName}`);
-        console.log(`Hãy mở file này lên để kiểm tra các ký tự: ${targetString}`);
+        console.log(`✅ SUCCESS! Saved to: ${outputFileName}`);
 
     } catch (e) {
-        console.error("❌ Lỗi khi compile font:", e);
-        fs.writeFileSync('debug_error.svg', svgContent);
+        console.error("❌ Error building font:", e);
+        fs.writeFileSync(path.join(COVERAGE_DIR, 'debug_error.svg'), svgContent);
     }
 }
 
-// Example usage:
-// Arg 1: String to debug
+// Entry point
 const targetStr = process.argv[2] || '✦★ Nhấnđểcọsver';
 debugAndBuildString(targetStr);
