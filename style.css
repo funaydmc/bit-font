@@ -1,45 +1,18 @@
-/* Font Declarations */
-@font-face {
-    font-family: 'Minecraft Custom';
-    src: url('font/MinecraftFont.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-}
+/* ========================================
+ * Minecraft Font Demo Page Styles
+ * Styles specific to the demo application
+ * ======================================== */
 
-@font-face {
-    font-family: 'Minecraft Custom';
-    src: url('font/MinecraftFont-Bold.woff2') format('woff2');
-    font-weight: bold;
-    font-style: normal;
-}
-
-/* Minecraft Color Variables */
+/* Demo Page Theme Variables */
 :root {
     --bg-color: #121212;
     --surface-color: #1e1e1e;
     --primary-color: #4caf50;
     --text-color: #e0e0e0;
     --border-color: #333;
-
-    /* Minecraft Colors */
-    --mc-black: #000000;
-    --mc-dark-blue: #0000AA;
-    --mc-dark-green: #00AA00;
-    --mc-dark-aqua: #00AAAA;
-    --mc-dark-red: #AA0000;
-    --mc-dark-purple: #AA00AA;
-    --mc-gold: #FFAA00;
-    --mc-gray: #AAAAAA;
-    --mc-dark-gray: #555555;
-    --mc-blue: #5555FF;
-    --mc-green: #55FF55;
-    --mc-aqua: #55FFFF;
-    --mc-red: #FF5555;
-    --mc-light-purple: #FF55FF;
-    --mc-yellow: #FFFF55;
-    --mc-white: #FFFFFF;
 }
 
+/* Demo Page Layout */
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -58,6 +31,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     width: 90%;
+    max-width: 1200px;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -71,6 +45,7 @@ h1 {
     color: var(--primary-color);
 }
 
+/* Demo Preview Area */
 .preview-area {
     position: relative;
     display: flex;
@@ -78,6 +53,13 @@ h1 {
     gap: 1rem;
 }
 
+@media (max-width: 768px) {
+    .preview-area {
+        flex-direction: column;
+    }
+}
+
+/* Demo Textarea Styles */
 textarea {
     width: 100%;
     height: 500px;
@@ -88,13 +70,11 @@ textarea {
     padding: 1rem;
     font-family: 'Minecraft Custom', sans-serif;
     font-size: 32px;
-    /* Large size to see pixels clearly */
     resize: vertical;
     outline: none;
     box-sizing: border-box;
     transition: border-color 0.3s ease;
     image-rendering: pixelated;
-    /* Essential for pixel fonts */
     line-height: 1.5;
 }
 
@@ -102,9 +82,10 @@ textarea:focus {
     border-color: var(--primary-color);
 }
 
+/* Demo Output Area */
 .item-lore {
     width: 100%;
-    min-height: 100px;
+    min-height: 500px;
     background-color: #000;
     color: #fff;
     border: 2px solid var(--border-color);
@@ -117,94 +98,110 @@ textarea:focus {
     line-height: 1.5;
     white-space: pre-wrap;
     word-wrap: break-word;
+    overflow-y: auto;
 }
 
-/* Minecraft Color Tags */
-black {
-    color: var(--mc-black);
-}
-
-dark_blue {
-    color: var(--mc-dark-blue);
-}
-
-dark_green {
-    color: var(--mc-dark-green);
-}
-
-dark_aqua {
-    color: var(--mc-dark-aqua);
-}
-
-dark_red {
-    color: var(--mc-dark-red);
-}
-
-dark_purple {
-    color: var(--mc-dark-purple);
-}
-
-gold {
-    color: var(--mc-gold);
-}
-
-gray {
-    color: var(--mc-gray);
-}
-
-dark_gray {
-    color: var(--mc-dark-gray);
-}
-
-blue {
-    color: var(--mc-blue);
-}
-
-green {
-    color: var(--mc-green);
-}
-
-aqua {
-    color: var(--mc-aqua);
-}
-
-red {
-    color: var(--mc-red);
-}
-
-light_purple {
-    color: var(--mc-light-purple);
-}
-
-yellow {
-    color: var(--mc-yellow);
-}
-
-white {
-    color: var(--mc-white);
-}
-
-/* Obfuscated text animation */
-.obfuscated {
-    display: inline-block;
-    animation: obfuscate 0.1s infinite;
-}
-
-@keyframes obfuscate {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.8;
-    }
-}
-
+/* Demo Footer */
 .footer {
     margin-top: 2rem;
     font-size: 0.8rem;
     color: #666;
     text-align: center;
+}
+
+/* Demo Control Panel */
+.control-panel {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.control-panel label {
+    color: var(--text-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Font Size Slider */
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.slider-container input[type="range"] {
+    width: 120px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-color);
+    outline: none;
+    transition: background 0.3s ease;
+    cursor: pointer;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb:hover {
+    background: #5cbf60;
+    transform: scale(1.1);
+}
+
+.slider-container input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    border: none;
+}
+
+#font-size-display {
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Toggle Buttons */
+.toggle-button {
+    background-color: var(--border-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.toggle-button:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.toggle-button.active {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Demo Specific Text Shadow Override */
+.text-shadow {
+    text-shadow: 0.125em 0.125em color-mix(in srgb, currentColor 25%, black);
 }

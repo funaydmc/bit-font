@@ -1,4 +1,10 @@
 
+/* ========================================
+ * Minecraft Font CSS Library
+ * Reusable styles for Minecraft-like text rendering
+ * ======================================== */
+
+/* Font Declarations */
 @font-face {
     font-family: 'Minecraft Custom';
     src: url('font/MinecraftFont.woff2') format('woff2');
@@ -13,12 +19,256 @@
     font-style: normal;
 }
 
-.bit-font {
-    font-family: 'Minecraft Custom', sans-serif;
-
-
+/* Minecraft Color Variables */
+:root {
+    /* Minecraft Colors */
+    --mc-black: #000000;
+    --mc-dark-blue: #0000AA;
+    --mc-dark-green: #00AA00;
+    --mc-dark-aqua: #00AAAA;
+    --mc-dark-red: #AA0000;
+    --mc-dark-purple: #AA00AA;
+    --mc-gold: #FFAA00;
+    --mc-gray: #AAAAAA;
+    --mc-dark-gray: #555555;
+    --mc-blue: #5555FF;
+    --mc-green: #55FF55;
+    --mc-aqua: #55FFFF;
+    --mc-red: #FF5555;
+    --mc-light-purple: #FF55FF;
+    --mc-yellow: #FFFF55;
+    --mc-white: #FFFFFF;
 }
 
-.item-lore {
+/* Base Minecraft Text Class */
+.minecraft-text {
     font-family: 'Minecraft Custom', sans-serif;
+    image-rendering: -webkit-optimize-contrast; /* Edge 79+ */
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -webkit-crisp-edges; /* Safari */
+    image-rendering: pixelated; /* Chrome, Opera */
+    image-rendering: crisp-edges; /* Standard */
+    line-height: 1.5;
+}
+
+/* Minecraft Color Classes */
+.mc-black {
+    color: var(--mc-black);
+}
+
+.mc-dark-blue {
+    color: var(--mc-dark-blue);
+}
+
+.mc-dark-green {
+    color: var(--mc-dark-green);
+}
+
+.mc-dark-aqua {
+    color: var(--mc-dark-aqua);
+}
+
+.mc-dark-red {
+    color: var(--mc-dark-red);
+}
+
+.mc-dark-purple {
+    color: var(--mc-dark-purple);
+}
+
+.mc-gold {
+    color: var(--mc-gold);
+}
+
+.mc-gray {
+    color: var(--mc-gray);
+}
+
+.mc-dark-gray {
+    color: var(--mc-dark-gray);
+}
+
+.mc-blue {
+    color: var(--mc-blue);
+}
+
+.mc-green {
+    color: var(--mc-green);
+}
+
+.mc-aqua {
+    color: var(--mc-aqua);
+}
+
+.mc-red {
+    color: var(--mc-red);
+}
+
+.mc-light-purple {
+    color: var(--mc-light-purple);
+}
+
+.mc-yellow {
+    color: var(--mc-yellow);
+}
+
+.mc-white {
+    color: var(--mc-white);
+}
+
+/* Legacy Minecraft Color Tags (for MiniMessage compatibility) */
+black {
+    color: var(--mc-black);
+}
+
+dark_blue {
+    color: var(--mc-dark-blue);
+}
+
+dark_green {
+    color: var(--mc-dark-green);
+}
+
+dark_aqua {
+    color: var(--mc-dark-aqua);
+}
+
+dark_red {
+    color: var(--mc-dark-red);
+}
+
+dark_purple {
+    color: var(--mc-dark-purple);
+}
+
+gold {
+    color: var(--mc-gold);
+}
+
+gray {
+    color: var(--mc-gray);
+}
+
+dark_gray {
+    color: var(--mc-dark-gray);
+}
+
+blue {
+    color: var(--mc-blue);
+}
+
+green {
+    color: var(--mc-green);
+}
+
+aqua {
+    color: var(--mc-aqua);
+}
+
+red {
+    color: var(--mc-red);
+}
+
+light_purple {
+    color: var(--mc-light-purple);
+}
+
+yellow {
+    color: var(--mc-yellow);
+}
+
+white {
+    color: var(--mc-white);
+}
+
+/* Text Effects */
+.mc-text-shadow {
+    text-shadow: 0.125em 0.125em color-mix(in srgb, currentColor 25%, black);
+}
+
+/* Obfuscated text animation */
+.mc-obfuscated, .obfuscated {
+    display: inline-block;
+    animation: mc-obfuscate 0.1s infinite;
+}
+
+@keyframes mc-obfuscate {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Text Decoration Color Override */
+.minecraft-text *, 
+.minecraft-text {
+    text-decoration-color: currentColor !important;
+}
+
+/* Specific decoration styles */
+.minecraft-text u, 
+.minecraft-text .underline, 
+.minecraft-text [style*="text-decoration: underline"], 
+.minecraft-text [style*="text-decoration-line: underline"] {
+    text-decoration-color: currentColor !important;
+}
+
+.minecraft-text s, 
+.minecraft-text .strikethrough, 
+.minecraft-text .line-through, 
+.minecraft-text [style*="text-decoration: line-through"], 
+.minecraft-text [style*="text-decoration-line: line-through"] {
+    text-decoration-color: currentColor !important;
+}
+
+/* Font Size Utilities */
+.mc-size-small {
+    font-size: 16px;
+}
+
+.mc-size-medium {
+    font-size: 24px;
+}
+
+.mc-size-large {
+    font-size: 32px;
+}
+
+.mc-size-xlarge {
+    font-size: 48px;
+}
+
+/* Background Styles (common for Minecraft UI) */
+.mc-background-dark {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.mc-background-tooltip {
+    background-color: rgba(16, 16, 16, 0.94);
+    border: 2px solid #5555FF;
+    color: #ffffff;
+}
+
+/* Utility Classes */
+.mc-no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.mc-pixelated {
+    image-rendering: -webkit-optimize-contrast; /* Edge 79+ */
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -webkit-crisp-edges; /* Safari */
+    image-rendering: pixelated; /* Chrome, Opera */
+    image-rendering: crisp-edges; /* Standard */
+}
+
+/* Global text decoration color fix */
+* {
+    text-decoration-color: currentColor !important;
 }

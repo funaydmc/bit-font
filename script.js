@@ -1,6 +1,9 @@
 // DOM Elements
 const textarea = document.getElementById('preview-text');
 const itemLore = document.querySelector('.item-lore');
+const shadowToggle = document.getElementById('shadow-toggle');
+const fontSizeSlider = document.getElementById('font-size-slider');
+const fontSizeDisplay = document.getElementById('font-size-display');
 
 // MiniMessage Parser
 class MiniMessageParser {
@@ -287,6 +290,63 @@ function updateItemLore() {
 
 // Event listener
 textarea.addEventListener('input', updateItemLore);
+
+// Text Shadow Toggle Functionality
+let shadowEnabled = false;
+
+function toggleTextShadow() {
+    shadowEnabled = !shadowEnabled;
+    
+    console.log('🔄 Toggle text shadow:', shadowEnabled ? 'ON' : 'OFF');
+    
+    if (shadowEnabled) {
+        textarea.classList.add('text-shadow');
+        itemLore.classList.add('text-shadow');
+        shadowToggle.textContent = 'ON';
+        shadowToggle.classList.add('active');
+        console.log('✅ Text shadow enabled');
+    } else {
+        textarea.classList.remove('text-shadow');
+        itemLore.classList.remove('text-shadow');
+        shadowToggle.textContent = 'OFF';
+        shadowToggle.classList.remove('active');
+        console.log('❌ Text shadow disabled');
+    }
+}
+
+// Debug function to check current state
+function debugState() {
+    console.log('🔍 Debug State:', {
+        shadowEnabled,
+        textareaClasses: textarea.className,
+        itemLoreClasses: itemLore.className,
+        buttonText: shadowToggle.textContent,
+        buttonClasses: shadowToggle.className
+    });
+}
+
+// Event listener for shadow toggle
+shadowToggle.addEventListener('click', () => {
+    toggleTextShadow();
+    debugState();
+});
+
+// Font Size Control Functionality
+function updateFontSize(size) {
+    const fontSize = size + 'px';
+    textarea.style.fontSize = fontSize;
+    itemLore.style.fontSize = fontSize;
+    fontSizeDisplay.textContent = fontSize;
+    console.log('📏 Font size updated:', fontSize);
+}
+
+// Event listener for font size slider
+fontSizeSlider.addEventListener('input', (e) => {
+    updateFontSize(e.target.value);
+});
+
+// Initialize font size
+updateFontSize(fontSizeSlider.value);
 
 // Initialize
 updateItemLore();

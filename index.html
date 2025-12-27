@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Font Tester</title>
+    <link rel="stylesheet" href="text.css">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -12,6 +13,18 @@
 
     <div class="container">
         <h1>Minecraft Font Tester</h1>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <label for="shadow-toggle">Text Shadow:</label>
+            <button id="shadow-toggle" class="toggle-button">OFF</button>
+            
+            <div class="slider-container">
+                <label for="font-size-slider">Font Size:</label>
+                <input type="range" id="font-size-slider" min="12" max="64" value="32" step="2">
+                <span id="font-size-display">32px</span>
+            </div>
+        </div>
 
         <div class="preview-area">
             <textarea id="preview-text" rows="10" spellcheck="false" placeholder="Use MiniMessage format:
