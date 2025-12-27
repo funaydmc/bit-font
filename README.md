@@ -14,11 +14,16 @@ A web-based tool for testing and previewing Minecraft-style fonts with MiniMessa
 
 The `mc_shadow` CSS class provides an accurate simulation of Minecraft's text shadow effect. You can toggle it on the demo page using the "Enable Minecraft Shadow" button.
 
+The shadow is implemented using:
+- **1px offset** (down and right) - matching Minecraft's exact rendering
+- **#3F3F3F color** (RGB 63,63,63) - following Minecraft's shadow formula (original color ÷ 4)
+- **No blur** - for crisp, pixel-perfect shadow
+
 ### Without Shadow
-![Without Shadow](https://github.com/user-attachments/assets/c7cc3c86-6cde-4496-b7fd-0356028c1840)
+![Without Shadow](https://github.com/user-attachments/assets/b9426b4a-dbe9-458d-b7ed-c93138c6ff24)
 
 ### With Shadow
-![With Shadow](https://github.com/user-attachments/assets/771f2f13-5378-4c23-88cd-d2ff5ac3bcf7)
+![With Shadow](https://github.com/user-attachments/assets/3523ff6a-f129-42ff-a4af-58cd8435219f)
 
 ## Usage
 
