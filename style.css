@@ -18,6 +18,9 @@
     --bg-color: #121212;
     --surface-color: #1e1e1e;
     --primary-color: #4caf50;
+    --primary-color-hover: #45a049;
+    --danger-color: #f44336;
+    --danger-color-hover: #da190b;
     --text-color: #e0e0e0;
     --border-color: #333;
 
@@ -90,7 +93,7 @@ h1 {
 }
 
 .toggle-btn:hover {
-    background-color: #45a049;
+    background-color: var(--primary-color-hover);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
@@ -100,11 +103,11 @@ h1 {
 }
 
 .toggle-btn.active {
-    background-color: #f44336;
+    background-color: var(--danger-color);
 }
 
 .toggle-btn.active:hover {
-    background-color: #da190b;
+    background-color: var(--danger-color-hover);
 }
 
 .preview-area {
