@@ -16,30 +16,42 @@ const FontBuilder = require('./core/font-builder');
 const Subsetter = require('./core/subsetter');
 
 /**
- * Build a single font variant (Regular or Bold).
- * @param {BitFont.CharData[]} charDataList 
- * @param {boolean} isBold 
+ * Generate SVG content for a variant.
+ * Safe to run in parallel as it's pure JS CPU work.
  */
-async function buildVariant(charDataList, isBold) {
+async function generateSvgTask(charDataList, isBold) {
+    const variantName = isBold ? 'BOLD' : 'REGULAR';
+    logger.info(`[${variantName}] Generating SVG path data...`);
+    const start = Date.now();
+    
+    // CPU intensive task
+    const svgContent = SvgGenerator.generate(charDataList, isBold);
+    
+    logger.info(`[${variantName}] SVG generated in ${(Date.now() - start) / 1000}s`);
+    return { svgContent, isBold };
+}
+
+/**
+ * Build font from SVG and create subsets.
+ * MUST run sequentially due to WASM constraints in fonteditor-core.
+ */
+async function buildFontTask({ svgContent, isBold }) {
     const variantName = isBold ? 'BOLD' : 'REGULAR';
     const fileName = isBold ? 'MinecraftFont-Bold.woff2' : 'MinecraftFont.woff2';
     const outputPath = path.join(CONFIG.paths.dist, fileName);
     const tempTtfPath = outputPath.replace('.woff2', '.ttf');
 
-    logger.info(`[${variantName}] Generating font data...`);
+    logger.info(`[${variantName}] Building font file (WASM)...`);
 
-    // 1. Generate SVG
-    const svgContent = SvgGenerator.generate(charDataList, isBold);
-
-    // 2. Create Font Object
+    // 1. Create Font Object
+    // This parses the SVG string. It's heavy but must be sequential.
     const fontObj = FontBuilder.createFont(svgContent);
     FontBuilder.setMetadata(fontObj, isBold);
 
-    // 3. Write WOFF2
+    // 2. Write WOFF2
     FontBuilder.writeWOFF2(fontObj, outputPath);
 
-    // 4. Create Subsets (Requires TTF)
-    // We generate a temp TTF, create subsets, then delete it.
+    // 3. Create Subsets (Requires TTF)
     FontBuilder.writeTTF(fontObj, tempTtfPath);
 
     try {
@@ -54,6 +66,7 @@ async function buildVariant(charDataList, isBold) {
 
 async function main() {
     logger.info('--- STARTING BUILD PROCESS ---');
+    const totalStart = Date.now();
 
     // Ensure output directory exists
     if (!fs.existsSync(CONFIG.paths.dist)) {
@@ -73,16 +86,24 @@ async function main() {
         // Apply Limits if configured
         if (CONFIG.limit && charDataList.length > CONFIG.limit) {
             logger.warn(`Limit applied: ${CONFIG.limit} chars.`);
-            // Note: Array is already sorted by FontLoader
             charDataList.length = CONFIG.limit;
         }
 
-        // 2. Build Variants Sequentially (Parallel execution causes issues with WASM modules)
-        logger.info('Starting builds...');
-        await buildVariant(charDataList, false);
-        await buildVariant(charDataList, true);
+        // 2. Generate SVGs in PARALLEL (CPU bound)
+        logger.info('Starting parallel SVG generation...');
+        const svgResults = await Promise.all([
+            generateSvgTask(charDataList, false),
+            generateSvgTask(charDataList, true)
+        ]);
 
-        logger.info('--- BUILD COMPLETE ---');
+        // 3. Build Fonts SEQUENTIALLY (WASM bound)
+        logger.info('Starting sequential font building...');
+        for (const result of svgResults) {
+            await buildFontTask(result);
+        }
+
+        const duration = (Date.now() - totalStart) / 1000;
+        logger.info(`--- BUILD COMPLETE in ${duration}s ---`);
 
     } catch (error) {
         logger.error('Build failed:', error);
