@@ -1,6 +1,24 @@
 // DOM Elements
 const textarea = document.getElementById('preview-text');
 const itemLore = document.querySelector('.item-lore');
+const shadowToggle = document.getElementById('shadow-toggle');
+
+// Shadow toggle functionality
+let shadowEnabled = false;
+
+shadowToggle.addEventListener('click', () => {
+    shadowEnabled = !shadowEnabled;
+    
+    if (shadowEnabled) {
+        itemLore.classList.add('mc_shadow');
+        shadowToggle.textContent = 'Disable Minecraft Shadow';
+        shadowToggle.classList.add('active');
+    } else {
+        itemLore.classList.remove('mc_shadow');
+        shadowToggle.textContent = 'Enable Minecraft Shadow';
+        shadowToggle.classList.remove('active');
+    }
+});
 
 // MiniMessage Parser
 class MiniMessageParser {
