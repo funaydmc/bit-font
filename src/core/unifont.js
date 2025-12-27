@@ -25,8 +25,8 @@ async function processUnifont(loader) {
             for (let cy = 0; cy < 16; cy++) {
                 for (let cx = 0; cx < 16; cx++) {
                     const charCode = (i * 256) + (cy * 16) + cx;
+                    if (charCode === 0xFFFE || charCode === 0xFFFF) continue;
                     const char = String.fromCharCode(charCode);
-
                     if (loader.processedCodes.has(char)) continue;
 
                     const charData = BitmapProcessor.extractBitmap(image, cx * tileWidth, cy * tileHeight, tileWidth, tileHeight);
