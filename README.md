@@ -16,7 +16,7 @@ The `mc_shadow` CSS class provides an accurate simulation of Minecraft's text sh
 
 The shadow is implemented using:
 - **0.125em offset** (right and down) - scales proportionally with font size
-- **rgba(0, 0, 0, 0.5)** - 50% black overlay that darkens any text color by 50%
+- **rgba(0, 0, 0, 0.5)** - semi-transparent black shadow that provides consistent darkening effect
 - **No blur** - for crisp, pixel-perfect shadow
 
 ### Without Shadow
