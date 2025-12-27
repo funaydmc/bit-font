@@ -1,0 +1,241 @@
+/* Font Declarations */
+@font-face {
+    font-family: 'Minecraft Custom';
+    src: url('font/MinecraftFont.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Minecraft Custom';
+    src: url('font/MinecraftFont-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+}
+
+/* Minecraft Color Variables */
+:root {
+    --bg-color: #121212;
+    --surface-color: #1e1e1e;
+    --primary-color: #4caf50;
+    --text-color: #e0e0e0;
+    --border-color: #333;
+
+    /* Minecraft Colors */
+    --mc-black: #000000;
+    --mc-dark-blue: #0000AA;
+    --mc-dark-green: #00AA00;
+    --mc-dark-aqua: #00AAAA;
+    --mc-dark-red: #AA0000;
+    --mc-dark-purple: #AA00AA;
+    --mc-gold: #FFAA00;
+    --mc-gray: #AAAAAA;
+    --mc-dark-gray: #555555;
+    --mc-blue: #5555FF;
+    --mc-green: #55FF55;
+    --mc-aqua: #55FFFF;
+    --mc-red: #FF5555;
+    --mc-light-purple: #FF55FF;
+    --mc-yellow: #FFFF55;
+    --mc-white: #FFFFFF;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: var(--surface-color);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+h1 {
+    text-align: center;
+    margin: 0;
+    font-weight: 300;
+    letter-spacing: 1px;
+    color: var(--primary-color);
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.toggle-btn {
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    font-weight: 500;
+}
+
+.toggle-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-1px);
+}
+
+.toggle-btn:active {
+    transform: translateY(0);
+}
+
+.toggle-btn.active {
+    background-color: #ff9800;
+}
+
+.preview-area {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+textarea {
+    width: 100%;
+    height: 500px;
+    background-color: #000;
+    color: #fff;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Minecraft Custom', sans-serif;
+    font-size: 32px;
+    /* Large size to see pixels clearly */
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+    image-rendering: pixelated;
+    /* Essential for pixel fonts */
+    line-height: 1.5;
+}
+
+textarea:focus {
+    border-color: var(--primary-color);
+}
+
+.item-lore {
+    width: 100%;
+    min-height: 100px;
+    background-color: #000;
+    color: #fff;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Minecraft Custom', sans-serif;
+    font-size: 32px;
+    box-sizing: border-box;
+    image-rendering: pixelated;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Minecraft Color Tags */
+black {
+    color: var(--mc-black);
+}
+
+dark_blue {
+    color: var(--mc-dark-blue);
+}
+
+dark_green {
+    color: var(--mc-dark-green);
+}
+
+dark_aqua {
+    color: var(--mc-dark-aqua);
+}
+
+dark_red {
+    color: var(--mc-dark-red);
+}
+
+dark_purple {
+    color: var(--mc-dark-purple);
+}
+
+gold {
+    color: var(--mc-gold);
+}
+
+gray {
+    color: var(--mc-gray);
+}
+
+dark_gray {
+    color: var(--mc-dark-gray);
+}
+
+blue {
+    color: var(--mc-blue);
+}
+
+green {
+    color: var(--mc-green);
+}
+
+aqua {
+    color: var(--mc-aqua);
+}
+
+red {
+    color: var(--mc-red);
+}
+
+light_purple {
+    color: var(--mc-light-purple);
+}
+
+yellow {
+    color: var(--mc-yellow);
+}
+
+white {
+    color: var(--mc-white);
+}
+
+/* Obfuscated text animation */
+.obfuscated {
+    display: inline-block;
+    animation: obfuscate 0.1s infinite;
+}
+
+@keyframes obfuscate {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.footer {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+}

@@ -1,0 +1,29 @@
+
+@font-face {
+    font-family: 'Minecraft Custom';
+    src: url('font/MinecraftFont.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Minecraft Custom';
+    src: url('font/MinecraftFont-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+}
+
+.bit-font {
+    font-family: 'Minecraft Custom', sans-serif;
+
+
+}
+
+.item-lore {
+    font-family: 'Minecraft Custom', sans-serif;
+}
+
+/* Minecraft Text Shadow */
+.mc_shadow {
+    text-shadow: 0.125em 0.125em 0 rgba(63, 63, 63, 1);
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Font Tester</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="text.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Minecraft Font Tester</h1>
+
+        <div class="controls">
+            <button id="shadow-toggle" class="toggle-btn">Toggle Shadow</button>
+        </div>
+
+        <div class="preview-area">
+            <textarea id="preview-text" rows="10" spellcheck="false" placeholder="Use MiniMessage format:
+<red>Red text</red> <blue>Blue text</blue>
+<bold>Bold</bold> <italic>Italic</italic>
+<#FF5555>Hex colors supported!
+<yellow><u>Underlined yellow</u></yellow>
+<st>Strikethrough</st> <obf>Obfuscated</obf>"><yellow><bold>Chọn server</bold></yellow>
+
+Nhấn để chọn server
+<gray>Unbreakable</gray>
+<aqua>minecraft:compass</aqua>
+<dark_gray>13 component(s)</dark_gray>
+</textarea>
+            <div class="item-lore">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated font path: dist/MinecraftFont.woff2
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
