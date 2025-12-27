@@ -222,7 +222,6 @@ white {
 }
 
 @keyframes obfuscate {
-
     0%,
     100% {
         opacity: 1;
