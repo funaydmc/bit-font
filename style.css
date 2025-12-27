@@ -244,7 +244,7 @@ white {
 /* Minecraft Text Shadow */
 /* 0.125em = 1/8 of font size, matching Minecraft's shadow offset ratio */
 .mc_shadow {
-    text-shadow: 0.125em 0.125em 0px rgba(0, 0, 0, 0.5);
+    text-shadow: 0.125em 0.125em 0px rgba(0, 0, 0, 0.75);
 }
 
 .footer {
