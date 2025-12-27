@@ -31,8 +31,14 @@ class FontLoader {
         try {
             await this.processReference('minecraft:default');
 
-            // Sort by Unicode
-            this.charList.sort((a, b) => a.unicode.localeCompare(b.unicode));
+            // Sort by Unicode Numeric Value (CodePoint) to ensure deterministic order limit
+            this.charList.sort((a, b) => (a.unicode.codePointAt(0) || 0) - (b.unicode.codePointAt(0) || 0));
+
+            logger.info(`Total loaded characters: ${this.charList.length}`);
+            logger.info(`Configuration Limit: ${CONFIG.limit}`);
+            if (this.charList.length > CONFIG.limit) {
+                logger.warn(`Will be sliced to ${CONFIG.limit}. Dropping ${this.charList.length - CONFIG.limit} characters.`);
+            }
 
             logger.success(`Loaded ${this.charList.length} characters.`);
             return this.charList;

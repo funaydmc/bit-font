@@ -77,12 +77,10 @@ async function main() {
             charDataList.length = CONFIG.limit;
         }
 
-        // 2. Build Variants in Parallel
-        logger.info('Starting parallel builds...');
-        await Promise.all([
-            buildVariant(charDataList, false),
-            buildVariant(charDataList, true)
-        ]);
+        // 2. Build Variants Sequentially (Parallel execution causes issues with WASM modules)
+        logger.info('Starting builds...');
+        await buildVariant(charDataList, false);
+        await buildVariant(charDataList, true);
 
         logger.info('--- BUILD COMPLETE ---');
 
