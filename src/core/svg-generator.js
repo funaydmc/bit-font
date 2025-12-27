@@ -14,7 +14,7 @@ class SvgGenerator {
      * @returns {string} The complete SVG string.
      */
     static generate(charDataList, isBold = false) {
-        let glyphsXML = '';
+        const glyphsXML = [];
         const usedCodePoints = new Set();
 
         for (const charData of charDataList) {
@@ -22,10 +22,10 @@ class SvgGenerator {
             if (!codePoint || usedCodePoints.has(codePoint)) continue;
             usedCodePoints.add(codePoint);
 
-            glyphsXML += this.createGlyphXML(charData, isBold);
+            glyphsXML.push(this.createGlyphXML(charData, isBold));
         }
 
-        return this.createFontXML(glyphsXML, isBold);
+        return this.createFontXML(glyphsXML.join(''), isBold);
     }
 
     /**
