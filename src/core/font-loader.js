@@ -13,34 +13,67 @@ const logger = require('../utils/logger');
 
 
 class FontLoader {
-    constructor() {
+    constructor(charset = 'full') {
         /** @type {BitFont.CharData[]} */
         this.charList = [];
         this.processedCodes = new Set();
+        this.charset = charset;
+        this.charsetFilter = this.createCharsetFilter(charset);
     }
 
     /**
-     * Main entry point to load all font data.
+     * Create charset filter based on charset option
+     * @param {string} charset
+     * @returns {Set<string>|null}
+     */
+    createCharsetFilter(charset) {
+        if (charset === 'full') {
+            return null; // No filtering, include all
+        }
+        if (charset === 'vi') {
+            return new Set(CONFIG.charsets.vi);
+        }
+        return null;
+    }
+
+    /**
+     * Check if character should be included based on charset filter
+     * @param {string} unicode
+     * @returns {boolean}
+     */
+    shouldIncludeChar(unicode) {
+        if (!this.charsetFilter) {
+            return true; // No filter, include all
+        }
+        return this.charsetFilter.has(unicode);
+    }
+
+    /**
+     * Main entry point to load font data with charset filtering.
      * @returns {Promise<BitFont.CharData[]>} List of character data objects.
      */
     async loadAll() {
-        logger.info('Starting font loading...');
+        logger.info(`Starting font loading for charset: ${this.charset}...`);
         this.charList = [];
         this.processedCodes.clear();
 
         try {
             await this.processReference('minecraft:default');
 
-            // Sort by Unicode Numeric Value (CodePoint) to ensure deterministic order limit
+            // Remove duplicates by unicode
+            const uniqueChars = new Map();
+            for (const charData of this.charList) {
+                if (!uniqueChars.has(charData.unicode)) {
+                    uniqueChars.set(charData.unicode, charData);
+                }
+            }
+            this.charList = Array.from(uniqueChars.values());
+
+            // Sort by Unicode Numeric Value (CodePoint) to ensure deterministic order
             this.charList.sort((a, b) => (a.unicode.codePointAt(0) || 0) - (b.unicode.codePointAt(0) || 0));
 
             logger.info(`Total loaded characters: ${this.charList.length}`);
-            logger.info(`Configuration Limit: ${CONFIG.limit}`);
-            if (this.charList.length > CONFIG.limit) {
-                logger.warn(`Will be sliced to ${CONFIG.limit}. Dropping ${this.charList.length - CONFIG.limit} characters.`);
-            }
-
-            logger.success(`Loaded ${this.charList.length} characters.`);
+            logger.success(`Loaded ${this.charList.length} unique characters for charset: ${this.charset}`);
             return this.charList;
         } catch (error) {
             logger.error('Error loading font data:', error);
@@ -184,11 +217,16 @@ class FontLoader {
     }
 
     /**
-     * Add a character to the list if valid.
+     * Add a character to the list if valid and matches charset filter.
      * @param {BitFont.CharData} charData 
      */
     addChar(charData) {
         if (!charData.unicode || charData.unicode === '\u0000' || charData.unicode.codePointAt(0) === 0) return;
+
+        // Apply charset filter
+        if (!this.shouldIncludeChar(charData.unicode)) {
+            return;
+        }
 
         if (charData.type === 'bitmap') {
             if (!charData.bitmap || charData.bitmap.length === 0) return;
@@ -203,4 +241,4 @@ class FontLoader {
     }
 }
 
-module.exports = new FontLoader(); // Export singleton instance
+module.exports = FontLoader; // Export class instead of singleton

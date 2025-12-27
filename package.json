@@ -5,6 +5,12 @@
     "main": "index.js",
     "scripts": {
         "build": "node src/build.js",
+        "build:vi-normal": "node src/build.js --charset=vi --type=normal",
+        "build:vi-bold": "node src/build.js --charset=vi --type=bold",
+        "build:full-normal": "node src/build.js --charset=full --type=normal",
+        "build:full-bold": "node src/build.js --charset=full --type=bold",        
+        "build:all": "npm run build:full-normal && npm run build:full-bold && npm run build:vi-normal && npm run build:vi-bold",
+        "clean": "rimraf dist",
         "debug": "node src/debug.js"
     },
     "keywords": [],
@@ -14,5 +20,8 @@
         "fonteditor-core": "^2.6.3",
         "fontmin": "^1.1.1",
         "pngjs": "^7.0.0"
+    },
+    "devDependencies": {
+        "rimraf": "^6.1.2"
     }
 }

@@ -11,9 +11,6 @@ const CONFIG = {
     pixelSize: 8,
     fontFamily: 'Minecraft Custom',
 
-    // Limits
-    limit: 53790,
-
     // Dimensions
     fontHeight: 8,
     unifontHeight: 16,
@@ -35,8 +32,8 @@ const CONFIG = {
         textureDir: path.resolve(__dirname, '../assets/texture'),
     },
 
-    // Subsetting
-    subsets: {
+    // Character sets for filtering
+    charsets: {
         vi: `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789` +
             `ÀÁÂÃĂẠẢẤẦẨẪẬẮẰẲẴẶÈÉÊẸẺẼẾỀỂỄỆÌÍỊỈĨÒÓÔÕƠỌỎỐỒỔỖỘỚỜỞỠỢÙÚƯỤỦỨỪỬỮỰỲÝỴỶỸ` +
             `àáâãăạảấầẩẫậắằẳẵặèéêẹẻẽếềểễệìíịỉĩòóôõơọỏốồổỗộớờởỡợùúưụủứừửữựỳýỵỷỹ` +

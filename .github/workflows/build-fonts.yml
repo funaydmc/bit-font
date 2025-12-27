@@ -1,0 +1,60 @@
+name: Reusable Font Build
+
+on:
+  workflow_call:
+    outputs:
+      artifacts-created:
+        description: 'Whether artifacts were created successfully'
+        value: ${{ jobs.font-matrix-build.outputs.success }}
+
+jobs:
+  font-matrix-build:
+    runs-on: ubuntu-latest
+    outputs:
+      success: ${{ steps.build-complete.outputs.success }}
+    strategy:
+      matrix:
+        include:
+          - charset: "full"
+            type: "normal"
+            script: "build:full-normal"
+            artifact_suffix: "full-normal"
+          - charset: "full" 
+            type: "bold"
+            script: "build:full-bold"
+            artifact_suffix: "full-bold"
+          - charset: "vi"
+            type: "normal" 
+            script: "build:vi-normal"
+            artifact_suffix: "vi-normal"
+          - charset: "vi"
+            type: "bold"
+            script: "build:vi-bold"
+            artifact_suffix: "vi-bold"
+    
+    name: Build Font (${{ matrix.charset }}-${{ matrix.type }})
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Generate WOFF2 font (${{ matrix.charset }}-${{ matrix.type }})
+        run: npm run ${{ matrix.script }}
+
+      - name: Upload font artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: font-${{ matrix.artifact_suffix }}
+          path: ./dist/**
+
+      - name: Mark build complete
+        id: build-complete
+        run: echo "success=true" >> $GITHUB_OUTPUT
