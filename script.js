@@ -6,7 +6,7 @@ const shadowToggle = document.getElementById('shadow-toggle');
 // Shadow toggle functionality
 let shadowEnabled = false;
 
-if (shadowToggle) {
+if (shadowToggle && itemLore) {
     shadowToggle.addEventListener('click', () => {
         shadowEnabled = !shadowEnabled;
         
