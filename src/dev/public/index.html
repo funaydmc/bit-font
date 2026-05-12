@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bit Font Dev Preview</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <main class="shell">
+        <section class="toolbar" aria-label="Thanh điều khiển">
+            <div>
+                <p class="eyebrow">Bit Font</p>
+                <h1>Dev Preview</h1>
+            </div>
+
+            <div class="actions">
+                <div class="status" id="connectionStatus">Đang kết nối</div>
+                <button class="button" id="rebuildButton" type="button">Build lại</button>
+            </div>
+        </section>
+
+        <section class="layout">
+            <aside class="panel controls" aria-label="Biến thể font">
+                <div class="panelHeader">
+                    <h2>Variant</h2>
+                    <span id="buildSummary">Chưa có dữ liệu</span>
+                </div>
+                <div class="customBox">
+                    <label for="customText">Preview</label>
+                    <textarea id="customText" spellcheck="false">Xin chào Việt Nam</textarea>
+                    <span id="customSummary">0 ký tự duy nhất</span>
+                </div>
+                <div class="variantList" id="variantList"></div>
+            </aside>
+
+            <section class="panel preview" aria-label="Xem trước font">
+                <div class="panelHeader">
+                    <h2>Preview</h2>
+                    <label class="weightControl">
+                        <input id="boldPreview" type="checkbox">
+                        <span>In đậm</span>
+                    </label>
+                    <label class="sizeControl">
+                        <span>Cỡ chữ</span>
+                        <input id="fontSize" type="range" min="8" max="72" value="36">
+                        <input id="fontSizeNumber" type="number" min="8" max="72" value="36">
+                    </label>
+                </div>
+
+                <div class="specimens" id="specimens"></div>
+            </section>
+        </section>
+    </main>
+
+    <style id="fontFaces"></style>
+    <script src="/app.js" defer></script>
+</body>
+</html>

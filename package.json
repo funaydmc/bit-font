@@ -5,11 +5,12 @@
     "description": "",
     "main": "index.js",
     "scripts": {
+        "dev": "node src/dev/server.js",
         "build": "node src/build.js",
         "build:vi-normal": "node src/build.js --charset=vi --type=normal",
         "build:vi-bold": "node src/build.js --charset=vi --type=bold",
         "build:full-normal": "node src/build.js --charset=full --type=normal",
-        "build:full-bold": "node src/build.js --charset=full --type=bold",        
+        "build:full-bold": "node src/build.js --charset=full --type=bold",
         "build:all": "pnpm run clean && pnpm run build:full-normal && pnpm run build:full-bold && pnpm run build:vi-normal && pnpm run build:vi-bold",
         "clean": "rimraf dist",
         "debug": "node src/debug.js"
@@ -23,6 +24,7 @@
         "pngjs": "^7.0.0"
     },
     "devDependencies": {
+        "chokidar": "^4.0.3",
         "rimraf": "^6.1.2"
     }
 }
