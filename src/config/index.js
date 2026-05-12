@@ -8,8 +8,8 @@ const path = require('path');
 const CONFIG = {
     // Font settings
     unitsPerEm: 1024,
-    pixelSize: 8,
-    fontFamily: 'Minecraft Custom',
+    pixelSize: 12,
+    fontFamily: 'minecraft',
 
     // Dimensions
     fontHeight: 8,
@@ -18,7 +18,7 @@ const CONFIG = {
     defaultAscent: 7,
 
     // Vertical offset to shift glyphs down (positive = move down)
-    yOffset: 0.8,
+    yOffset: 0,
 
     // Scaling
     // SCALE = 1024 / 8 = 128

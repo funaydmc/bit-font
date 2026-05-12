@@ -25,10 +25,20 @@ const WORKER_PATH = path.join(__dirname, 'build-worker.js');
 const WATCH_DIRS = [CONFIG.paths.src];
 const WATCH_EXTENSIONS = new Set(['.js', '.json', '.png']);
 const WATCH_DEBOUNCE_MS = 500;
+const BUILD_CONFIG_FIELDS = [
+    'unitsPerEm',
+    'pixelSize',
+    'fontHeight',
+    'unifontHeight',
+    'unifontAscent',
+    'defaultAscent',
+    'yOffset'
+];
 
 const clients = new Set();
 const selectedVariantIds = new Set(['custom-normal']);
 let customText = 'Xin chào Việt Nam';
+let buildConfig = Object.fromEntries(BUILD_CONFIG_FIELDS.map((key) => [key, CONFIG[key]]));
 const variantState = new Map(VARIANTS.map((variant) => [
     variant.id,
     {
@@ -46,6 +56,8 @@ let activeBuild = null;
 let nextJobId = 1;
 let rebuildTimer = null;
 let lastChange = null;
+let autoRebuild = true;
+let sourceDirty = false;
 
 function sendJson(res, statusCode, payload) {
     const body = JSON.stringify(payload);
@@ -76,6 +88,41 @@ function setsEqual(left, right) {
 
 function hasSelectedCustomVariant() {
     return Array.from(selectedVariantIds).some((variantId) => variantId.startsWith('custom-'));
+}
+
+function sanitizeBuildConfig(input) {
+    if (!input || typeof input !== 'object') {
+        return null;
+    }
+
+    const nextConfig = {};
+    for (const key of BUILD_CONFIG_FIELDS) {
+        if (Object.prototype.hasOwnProperty.call(input, key)) {
+            const value = Number(input[key]);
+            if (Number.isFinite(value)) {
+                nextConfig[key] = value;
+            }
+        }
+    }
+
+    return nextConfig;
+}
+
+function updateBuildConfig(input) {
+    const sanitized = sanitizeBuildConfig(input);
+    if (!sanitized) {
+        return false;
+    }
+
+    let changed = false;
+    for (const [key, value] of Object.entries(sanitized)) {
+        if (buildConfig[key] !== value) {
+            buildConfig[key] = value;
+            changed = true;
+        }
+    }
+
+    return changed;
 }
 
 function readBody(req) {
@@ -167,6 +214,9 @@ function getState() {
         customText,
         normalizedCustomText,
         customCharCount: Array.from(normalizedCustomText).length,
+        autoRebuild,
+        buildConfig,
+        sourceDirty,
         lastChange
     };
 }
@@ -286,7 +336,10 @@ async function startBuild(reason, options = {}) {
         return;
     }
 
-    if (options.invalidate) {
+    if (options.invalidate === 'all') {
+        activeBuild = null;
+        await terminateWorker();
+    } else if (options.invalidate) {
         if (activeBuild) {
             activeBuild = null;
             await terminateWorker();
@@ -305,7 +358,8 @@ async function startBuild(reason, options = {}) {
         type: 'build',
         jobId,
         variantIds: ids,
-        customText
+        customText,
+        buildConfig
     });
 }
 
@@ -315,9 +369,15 @@ function scheduleRebuild(filePath) {
     }
 
     lastChange = path.relative(CONFIG.paths.root, filePath);
+    sourceDirty = true;
 
     clearTimeout(rebuildTimer);
     rebuildTimer = setTimeout(() => {
+        if (!autoRebuild) {
+            broadcast('state', getState());
+            return;
+        }
+        sourceDirty = false;
         startBuild(`changed ${lastChange}`, { interrupt: true, invalidate: 'all' });
     }, WATCH_DEBOUNCE_MS);
 }
@@ -342,6 +402,7 @@ async function handleApi(req, res, pathname) {
             const nextSelectedIds = new Set(nextSelected);
             const selectionChanged = !setsEqual(selectedVariantIds, nextSelectedIds);
             let customChanged = false;
+            let configChanged = false;
 
             if (typeof body.customText === 'string') {
                 const nextCustomText = body.customText;
@@ -350,17 +411,23 @@ async function handleApi(req, res, pathname) {
                 }
                 customText = nextCustomText;
             }
+            if (typeof body.autoRebuild === 'boolean') {
+                autoRebuild = body.autoRebuild;
+            }
+            if (body.buildConfig) {
+                configChanged = updateBuildConfig(body.buildConfig);
+            }
 
             selectedVariantIds.clear();
             nextSelectedIds.forEach((variantId) => selectedVariantIds.add(variantId));
 
             sendJson(res, 200, getState());
-            if (selectionChanged || (customChanged && hasSelectedCustomVariant())) {
+            if (autoRebuild && (selectionChanged || configChanged || (customChanged && hasSelectedCustomVariant()))) {
                 await startBuild('selection update', {
                     interrupt: true,
-                    invalidate: customChanged ? 'custom' : null
+                    invalidate: configChanged ? 'all' : (customChanged ? 'custom' : null)
                 });
-            } else if (customChanged) {
+            } else if (customChanged || selectionChanged || configChanged) {
                 broadcast('state', getState());
             }
         } catch (error) {
@@ -370,14 +437,21 @@ async function handleApi(req, res, pathname) {
     }
 
     if (req.method === 'POST' && pathname === '/api/rebuild') {
+        let customChanged = false;
+        let configChanged = false;
         try {
             const body = await readBody(req);
-            let customChanged = false;
             if (typeof body.customText === 'string') {
                 if (normalizeCustomText(body.customText) !== normalizeCustomText(customText)) {
                     customChanged = true;
                 }
                 customText = body.customText;
+            }
+            if (typeof body.autoRebuild === 'boolean') {
+                autoRebuild = body.autoRebuild;
+            }
+            if (body.buildConfig) {
+                configChanged = updateBuildConfig(body.buildConfig);
             }
         } catch (error) {
             sendError(res, 400, error.message);
@@ -385,9 +459,11 @@ async function handleApi(req, res, pathname) {
         }
 
         sendJson(res, 202, getState());
+        const invalidateScope = (sourceDirty || configChanged) ? 'all' : null;
+        sourceDirty = false;
         await startBuild('manual rebuild', {
             interrupt: true,
-            invalidate: customChanged ? 'custom' : null
+            invalidate: invalidateScope || (customChanged ? 'custom' : null)
         });
         return;
     }

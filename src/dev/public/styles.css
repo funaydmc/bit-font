@@ -46,10 +46,13 @@ textarea {
 .panelHeader,
 .actions,
 .sizeControl,
+.detailControl,
+.autoControl,
 .weightControl,
 .variantTop,
 .variantMeta,
-.customBox {
+.customBox,
+.configBox {
     display: flex;
     align-items: center;
 }
@@ -196,6 +199,42 @@ h2 {
     font-size: 12px;
 }
 
+.configBox {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+}
+
+.configTitle {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.configGrid {
+    display: grid;
+    grid-template-columns: 1fr 88px;
+    gap: 8px 10px;
+    align-items: center;
+}
+
+.configGrid label {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.configGrid input {
+    width: 88px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fbfbf8;
+    color: var(--ink);
+}
+
 .variantRow {
     padding: 14px 16px;
     border-bottom: 1px solid var(--line);
@@ -268,12 +307,16 @@ h2 {
     min-width: 280px;
 }
 
+.detailControl,
+.autoControl,
 .weightControl {
     gap: 8px;
     color: var(--ink);
     cursor: pointer;
 }
 
+.detailControl input,
+.autoControl input,
 .weightControl input {
     width: 18px;
     height: 18px;
@@ -319,6 +362,57 @@ h2 {
     min-height: 70px;
     overflow-wrap: anywhere;
     line-height: 1.45;
+    white-space: pre-wrap;
+}
+
+.sample.detail {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 2px 0;
+}
+
+.sampleChar {
+    display: inline-block;
+}
+
+.metrics {
+    display: grid;
+    gap: 12px;
+    padding: 0 16px 16px;
+}
+
+#glyphCanvas {
+    width: 100%;
+    min-height: 140px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fbfbf8;
+}
+
+.metricGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px;
+}
+
+.metricItem {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    font-size: 12px;
+}
+
+.metricItem span:first-child {
+    color: var(--muted);
+}
+
+.metricItem strong {
+    font-weight: 700;
 }
 
 .empty {

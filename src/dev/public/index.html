@@ -31,12 +31,21 @@
                     <textarea id="customText" spellcheck="false">Xin chào Việt Nam</textarea>
                     <span id="customSummary">0 ký tự duy nhất</span>
                 </div>
+                <div class="configBox" id="configBox" aria-label="Build config"></div>
                 <div class="variantList" id="variantList"></div>
             </aside>
 
             <section class="panel preview" aria-label="Xem trước font">
                 <div class="panelHeader">
                     <h2>Preview</h2>
+                    <label class="detailControl">
+                        <input id="detailPreview" type="checkbox">
+                        <span>Detail</span>
+                    </label>
+                    <label class="autoControl">
+                        <input id="autoRebuild" type="checkbox" checked>
+                        <span>Auto rebuild</span>
+                    </label>
                     <label class="weightControl">
                         <input id="boldPreview" type="checkbox">
                         <span>In đậm</span>
@@ -49,6 +58,10 @@
                 </div>
 
                 <div class="specimens" id="specimens"></div>
+                <section class="metrics" aria-label="Thông số glyph">
+                    <canvas id="glyphCanvas"></canvas>
+                    <div class="metricGrid" id="glyphMetrics"></div>
+                </section>
             </section>
         </section>
     </main>

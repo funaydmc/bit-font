@@ -4,9 +4,18 @@
  */
 
 const { parentPort } = require('worker_threads');
+const CONFIG = require('../config');
 const { FontBuildService } = require('../core/build-service');
 
 const buildService = new FontBuildService();
+
+function applyBuildConfig(buildConfig = {}) {
+    for (const [key, value] of Object.entries(buildConfig)) {
+        if (typeof value === 'number' && Number.isFinite(value) && key in CONFIG) {
+            CONFIG[key] = value;
+        }
+    }
+}
 
 parentPort.on('message', async (message) => {
     if (message.type === 'invalidate') {
@@ -23,6 +32,7 @@ parentPort.on('message', async (message) => {
     }
 
     const { jobId, variantIds, customText } = message;
+    applyBuildConfig(message.buildConfig);
 
     for (const variantId of variantIds) {
         try {
