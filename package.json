@@ -1,6 +1,7 @@
 {
     "name": "bit-font",
     "version": "1.0.0",
+    "packageManager": "pnpm@11.0.9",
     "description": "",
     "main": "index.js",
     "scripts": {
@@ -9,12 +10,12 @@
         "build:vi-bold": "node src/build.js --charset=vi --type=bold",
         "build:full-normal": "node src/build.js --charset=full --type=normal",
         "build:full-bold": "node src/build.js --charset=full --type=bold",        
-        "build:all": "npm run build:full-normal && npm run build:full-bold && npm run build:vi-normal && npm run build:vi-bold",
+        "build:all": "pnpm run clean && pnpm run build:full-normal && pnpm run build:full-bold && pnpm run build:vi-normal && pnpm run build:vi-bold",
         "clean": "rimraf dist",
         "debug": "node src/debug.js"
     },
     "keywords": [],
-    "author": "",
+    "author": "funayd",
     "license": "ISC",
     "dependencies": {
         "fonteditor-core": "^2.6.3",

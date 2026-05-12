@@ -17,6 +17,9 @@ const CONFIG = {
     unifontAscent: 15,
     defaultAscent: 7,
 
+    // Vertical offset to shift glyphs down (positive = move down)
+    yOffset: 0.8,
+
     // Scaling
     // SCALE = 1024 / 8 = 128
     get scale() {

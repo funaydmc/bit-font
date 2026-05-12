@@ -71,11 +71,11 @@ function parseArgs() {
 function showBuildTasks() {
     console.log(`
 Available build tasks:
-  npm run build:vi-normal   - Vietnamese charset, normal weight
-  npm run build:vi-bold     - Vietnamese charset, bold weight
-  npm run build:full-normal - Full charset, normal weight
-  npm run build:full-bold   - Full charset, bold weight
-  npm run build:all         - All variants
+  pnpm run build:vi-normal   - Vietnamese charset, normal weight
+  pnpm run build:vi-bold     - Vietnamese charset, bold weight
+  pnpm run build:full-normal - Full charset, normal weight
+  pnpm run build:full-bold   - Full charset, bold weight
+  pnpm run build:all         - All variants
 
 Use --help for more info: node src/build.js --help
 `);
@@ -107,12 +107,12 @@ Examples:
   node src/build.js --type=bold                  # Full chars, bold weight
   node src/build.js --charset=vi --type=bold     # Vietnamese chars, bold weight
 
-NPM Scripts:
-  npm run build:vi-normal          # Vietnamese charset, normal weight
-  npm run build:vi-bold            # Vietnamese charset, bold weight
-  npm run build:full-normal        # Full charset, normal weight
-  npm run build:full-bold          # Full charset, bold weight
-  npm run build:all                # All variants
+pnpm scripts:
+  pnpm run build:vi-normal          # Vietnamese charset, normal weight
+  pnpm run build:vi-bold            # Vietnamese charset, bold weight
+  pnpm run build:full-normal        # Full charset, normal weight
+  pnpm run build:full-bold          # Full charset, bold weight
+  pnpm run build:all                # All variants
 `);
 }
 

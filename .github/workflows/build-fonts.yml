@@ -37,17 +37,20 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install Node.js dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Generate WOFF2 font (${{ matrix.charset }}-${{ matrix.type }})
-        run: npm run ${{ matrix.script }}
+        run: pnpm run ${{ matrix.script }}
 
       - name: Upload font artifact
         uses: actions/upload-artifact@v4

@@ -69,7 +69,8 @@ class SvgGenerator {
             const rawPath = BitmapProcessor.toSVGPath(bitmapToUse);
             if (rawPath) {
                 const ascent = charData.ascent !== undefined ? charData.ascent : (charData.height - 1);
-                d = this.transformPathToFontCoords(rawPath, effectiveScale, ascent, xOffset);
+                const yOffset = CONFIG.yOffset || 0;
+                d = this.transformPathToFontCoords(rawPath, effectiveScale, ascent, xOffset, yOffset);
             }
         } else if (charData.type === 'space') {
             horizAdvX = visualWidth * effectiveScale;
@@ -91,14 +92,15 @@ class SvgGenerator {
      * @param {number} scale - Scaling factor.
      * @param {number} ascentPixel - Ascent in pixels.
      * @param {number} xOffsetPixel - X offset in pixels.
+     * @param {number} yOffsetPixel - Y offset in pixels (positive = move down).
      * @returns {string} Transformed path data.
      */
-    static transformPathToFontCoords(d, scale, ascentPixel, xOffsetPixel) {
+    static transformPathToFontCoords(d, scale, ascentPixel, xOffsetPixel, yOffsetPixel = 0) {
         return d.replace(/([ML])\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)/g, (match, command, x, y) => {
             const pixelX = parseFloat(x);
             const pixelY = parseFloat(y);
             const fontX = (pixelX + xOffsetPixel) * scale;
-            const fontY = (ascentPixel - pixelY) * scale;
+            const fontY = (ascentPixel - pixelY - yOffsetPixel) * scale;
             return `${command}${Math.round(fontX)} ${Math.round(fontY)}`;
         });
     }
