@@ -15,6 +15,8 @@ const FontBuilder = require('./font-builder');
 const VARIANTS = [
     { id: 'full-normal', charset: 'full', type: 'normal', label: 'Full Regular' },
     { id: 'full-bold', charset: 'full', type: 'bold', label: 'Full Bold' },
+    { id: 'ascii-normal', charset: 'ascii', type: 'normal', label: 'ASCII Regular' },
+    { id: 'ascii-bold', charset: 'ascii', type: 'bold', label: 'ASCII Bold' },
     { id: 'vi-normal', charset: 'vi', type: 'normal', label: 'Vietnamese Regular' },
     { id: 'vi-bold', charset: 'vi', type: 'bold', label: 'Vietnamese Bold' },
     { id: 'custom-normal', charset: 'custom', type: 'normal', label: 'Custom Regular' },

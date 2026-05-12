@@ -33,6 +33,9 @@ class FontLoader {
         if (charset === 'vi') {
             return new Set(CONFIG.charsets.vi);
         }
+        if (CONFIG.charsets[charset]) {
+            return new Set(CONFIG.charsets[charset]);
+        }
         return null;
     }
 

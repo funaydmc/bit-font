@@ -1,5 +1,6 @@
 const VARIANT_GROUPS = [
     { id: 'full', label: 'Full', normal: 'full-normal', bold: 'full-bold' },
+    { id: 'ascii', label: 'ASCII', normal: 'ascii-normal', bold: 'ascii-bold' },
     { id: 'vi', label: 'Vietnamese', normal: 'vi-normal', bold: 'vi-bold' },
     { id: 'custom', label: 'Custom', normal: 'custom-normal', bold: 'custom-bold' }
 ];

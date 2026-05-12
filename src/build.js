@@ -13,6 +13,8 @@ function showBuildTasks() {
 Available build tasks:
   pnpm run build:vi-normal   - Vietnamese charset, normal weight
   pnpm run build:vi-bold     - Vietnamese charset, bold weight
+  pnpm run build:ascii-normal - ASCII charset, normal weight
+  pnpm run build:ascii-bold   - ASCII charset, bold weight
   pnpm run build:full-normal - Full charset, normal weight
   pnpm run build:full-bold   - Full charset, bold weight
   pnpm run build:all         - All variants
@@ -29,7 +31,8 @@ Usage: node src/build.js [options]
 
 Options:
   --charset=<value>    Charset to use (default: full)
-                       full: Include all available characters
+                       full:  Include all available characters
+                       ascii: ASCII printable character subset only
                        vi:   Vietnamese character subset only
 
   --type=<value>       Font type to build (default: normal)
@@ -47,6 +50,8 @@ Examples:
 pnpm scripts:
   pnpm run build:vi-normal          # Vietnamese charset, normal weight
   pnpm run build:vi-bold            # Vietnamese charset, bold weight
+  pnpm run build:ascii-normal       # ASCII charset, normal weight
+  pnpm run build:ascii-bold         # ASCII charset, bold weight
   pnpm run build:full-normal        # Full charset, normal weight
   pnpm run build:full-bold          # Full charset, bold weight
   pnpm run build:all                # All variants
@@ -68,12 +73,12 @@ function parseArgs() {
     args.forEach((arg) => {
         if (arg.startsWith('--charset=')) {
             const charset = arg.split('=')[1];
-            if (['full', 'vi'].includes(charset)) {
+            if (['full', 'ascii', 'vi'].includes(charset)) {
                 options.charset = charset;
                 return;
             }
 
-            logger.error(`Invalid charset: ${charset}. Valid options: full, vi`);
+            logger.error(`Invalid charset: ${charset}. Valid options: full, ascii, vi`);
             showHelp();
             process.exit(1);
         }

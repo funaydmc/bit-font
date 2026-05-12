@@ -37,6 +37,7 @@ const CONFIG = {
 
     // Character sets for filtering
     charsets: {
+        ascii: Array.from({ length: 95 }, (_, index) => String.fromCharCode(index + 32)).join(''),
         vi: `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789` +
             `ÀÁÂÃĂẠẢẤẦẨẪẬẮẰẲẴẶÈÉÊẸẺẼẾỀỂỄỆÌÍỊỈĨÒÓÔÕƠỌỎỐỒỔỖỘỚỜỞỠỢÙÚƯỤỦỨỪỬỮỰỲÝỴỶỸ` +
             `àáâãăạảấầẩẫậắằẳẵặèéêẹẻẽếềểễệìíịỉĩòóôõơọỏốồổỗộớờởỡợùúưụủứừửữựỳýỵỷỹ` +
